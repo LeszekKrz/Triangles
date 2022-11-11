@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Triangles
 {
-    internal class Vertex
+    public class Vertex : IComparable<Vertex>
     {
         VertexCoordinates coordinates;
         NormalVector vector;
@@ -27,9 +27,14 @@ namespace Triangles
             int range = size / 2;
             return new Point((int)(50 + coordinates.X * range + range), (int)(50 + coordinates.Y * range + range));
         }
+
+        public int CompareTo(Vertex? other)
+        {
+            return this.Coordinates.Y.CompareTo(other.Coordinates.Y);
+        }
     }
 
-    internal class VertexCoordinates
+    public class VertexCoordinates
     {
         double x;
         double y;
@@ -47,7 +52,7 @@ namespace Triangles
         }
     }
 
-    internal class NormalVector
+    public class NormalVector
     {
         double xn;
         double yn;

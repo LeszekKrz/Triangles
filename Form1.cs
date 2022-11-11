@@ -33,7 +33,7 @@ namespace Triangles
             using (Graphics g = Graphics.FromImage(drawArea.Image))
             {
                 g.Clear(Color.White);
-                if (triangles != null)
+                if (triangles != null && triangles.Count > 0)
                 {
                     int size = drawArea.Size.Width - 100;
                     if (drawArea.Size.Height < size) size = drawArea.Size.Height;
@@ -43,6 +43,8 @@ namespace Triangles
                         g.DrawLine(blackPen, triangle.B.ToPoint(size), triangle.C.ToPoint(size));
                         g.DrawLine(blackPen, triangle.C.ToPoint(size), triangle.A.ToPoint(size));
                     }
+                    drawArea.Refresh();
+                    triangles[0].PaintTriangle(size, g, drawArea);
                 }
             }
             drawArea.Refresh();
@@ -120,7 +122,7 @@ namespace Triangles
             {
                 Height += drawArea.Width - drawArea.Height;
             }
-            Debug.WriteLine($"{Width} {Height}");
+            Debug.WriteLine($"{-1 % 3}");
             Redraw();
         }
     }
