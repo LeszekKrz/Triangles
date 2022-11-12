@@ -30,7 +30,8 @@ namespace Triangles
 
         public int CompareTo(Vertex? other)
         {
-            return this.Coordinates.Y.CompareTo(other.Coordinates.Y);
+            if (Coordinates.Y.CompareTo(other.Coordinates.Y) == 0) return Coordinates.X.CompareTo(other.Coordinates.X);
+            return coordinates.Y.CompareTo(other.Coordinates.Y);
         }
     }
 

@@ -57,7 +57,7 @@ namespace Triangles
             return this[v];
         }
 
-        public void PaintTriangle(int size, Graphics g, PictureBox drawArea)
+        public void PaintTriangle(int size, Graphics g)
         {
             List<Vertex> vertices = new List<Vertex>() { a, b, c };
             vertices.Sort();
@@ -68,53 +68,66 @@ namespace Triangles
 
             int k = 0;
 
-            Vertex curr;
-            Vertex prev;
-            Vertex next;
+            Point curr;
+            Point prev;
+            Point next;
 
-            curr = this[indices[k]];
+            curr = this[indices[k]].ToPoint(size);
+
 
             while (y != this[indices[2]].ToPoint(size).Y)
             {
-                while (y == curr.Coordinates.Y)
+                while (y == curr.Y)
                 {
-                    prev = this[this[this[indices[k] + 3 - 1]]];
-                    if (prev.Coordinates.Y >= curr.Coordinates.Y)
-                    {
-                        AET.Add(new ActiveEdge(curr.ToPoint(size), prev.ToPoint(size)));
-                    }
-                    else
-                    {
-                        AET.Remove(new ActiveEdge(prev.ToPoint(size), curr.ToPoint(size)));
-                    }
-                    next = this[this[this[indices[k] + 1]]];
-                    if (next.Coordinates.Y >= curr.Coordinates.Y)
-                    {
-                        AET.Add(new ActiveEdge(curr.ToPoint(size), next.ToPoint(size)));
-                    }
-                    else
-                    {
-                        AET.Remove(new ActiveEdge(prev.ToPoint(size), curr.ToPoint(size)));
-                    }
+                    Vertex d1 = this[indices[k]];
+                    int d2 = this[d1];
+                    Vertex d3 = this[d2 + 3 - 1];
 
+                    Point pa = a.ToPoint(size);
+                    Point pb = b.ToPoint(size);
+                    Point pc = c.ToPoint(size);
+
+                    prev = this[indices[k] + 3 - 1].ToPoint(size);
+                    if (prev.Y > curr.Y)
+                    {
+                        AET.Add(new ActiveEdge(curr, prev));
+                    }
+                    else if (prev.Y < curr.Y)
+                    {
+                        AET.Remove(new ActiveEdge(prev, curr));
+                    }
+                    next = this[indices[k] +1 ].ToPoint(size);
+                    if (next.Y > curr.Y)
+                    {
+                        AET.Add(new ActiveEdge(curr, next));
+                    }
+                    else if (next.Y < curr.Y)
+                    {
+                        AET.Remove(new ActiveEdge(next, curr));
+                    }
                     k++;
-                    curr = this[indices[k]];
-
+                    curr = this[indices[k]].ToPoint(size);
                 }
+                //Debug.WriteLine("koniec petli AET");
                 AET.Sort();
-                for (int i = 0; i < AET.Count; i *= 2)
+            //if (this[indices[0]].Coordinates.Y == this[indices[1]].Coordinates.Y)
+            //{
+            //    Debug.WriteLine("Pozioma");
+            //}
+                for (int i = 0; i < AET.Count; i += 2)
                 {
+                    //Debug.WriteLine($"{(int)Math.Round(AET[i].X)} {(int)Math.Round(AET[i + 1].X)}");
                     for (int j = (int)Math.Round(AET[i].X); j < (int)Math.Round(AET[i + 1].X); j++)
                     {
+                        //Debug.WriteLine($"{(int)Math.Round(AET[i].X)} {j} {(int)Math.Round(AET[i + 1].X)}");
                         brush = new SolidBrush(Color.Green);
-                        g.FillRectangle(brush, j, i, 1, 1);
+                        g.FillRectangle(brush, j, y, 1, 1);
                     }
                     AET[i].Step();
                     AET[i + 1].Step();
                 }
                 y++;
-                drawArea.Refresh();
-                Debug.WriteLine("linia");
+                //Debug.WriteLine("linia");
             }
             
         }
@@ -123,7 +136,6 @@ namespace Triangles
     public class ActiveEdge : IComparable<ActiveEdge>
     {
         double x;
-        int yMax;
         double m;
 
         Point u;
@@ -137,8 +149,7 @@ namespace Triangles
             this.v = v;
 
             x = u.X;
-            yMax = v.Y;
-            if (u.Y != v.Y) m = (v.X - u.X) / (v.Y - u.Y);
+            if (u.Y != v.Y) m = (v.X - u.X) / (double)(v.Y - u.Y);
             else m = 0;
 
         }

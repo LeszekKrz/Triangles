@@ -17,12 +17,15 @@ namespace Triangles
     {
         List<Triangle> triangles;
         Pen blackPen;
+        Pen redPen;
+        bool drawLines = true;
 
         public Form1()
         {
             InitializeComponent();
             triangles = new List<Triangle>();
             blackPen = new Pen(Color.Black);
+            redPen = new Pen(Color.Red);
             Redraw();
         }
 
@@ -37,14 +40,21 @@ namespace Triangles
                 {
                     int size = drawArea.Size.Width - 100;
                     if (drawArea.Size.Height < size) size = drawArea.Size.Height;
-                    foreach (Triangle triangle in triangles)
+                    if (drawLines) foreach (Triangle triangle in triangles)
                     {
                         g.DrawLine(blackPen, triangle.A.ToPoint(size), triangle.B.ToPoint(size));
                         g.DrawLine(blackPen, triangle.B.ToPoint(size), triangle.C.ToPoint(size));
                         g.DrawLine(blackPen, triangle.C.ToPoint(size), triangle.A.ToPoint(size));
                     }
                     drawArea.Refresh();
-                    triangles[0].PaintTriangle(size, g, drawArea);
+                    foreach(Triangle triangle in triangles)
+                    {
+                        //g.DrawLine(redPen, triangle.A.ToPoint(size), triangle.B.ToPoint(size));
+                        //g.DrawLine(redPen, triangle.B.ToPoint(size), triangle.C.ToPoint(size));
+                        //g.DrawLine(redPen, triangle.C.ToPoint(size), triangle.A.ToPoint(size));
+                        triangle.PaintTriangle(size, g);
+                        //System.Threading.Thread.Sleep(20);
+                    }
                 }
             }
             drawArea.Refresh();
@@ -63,6 +73,7 @@ namespace Triangles
                     string? line;
                     List<VertexCoordinates> coordinates = new List<VertexCoordinates>();
                     List<NormalVector> normals = new List<NormalVector>();
+                    triangles = new List<Triangle>();
                     while ((line = read.ReadLine()) != null)
                     {
                         string[] tempString = line.Split(' ');

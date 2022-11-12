@@ -49,7 +49,7 @@
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(834, 561);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(955, 756);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // drawArea
@@ -58,7 +58,7 @@
             this.drawArea.Location = new System.Drawing.Point(3, 3);
             this.drawArea.MinimumSize = new System.Drawing.Size(400, 500);
             this.drawArea.Name = "drawArea";
-            this.drawArea.Size = new System.Drawing.Size(628, 555);
+            this.drawArea.Size = new System.Drawing.Size(749, 750);
             this.drawArea.TabIndex = 0;
             this.drawArea.TabStop = false;
             // 
@@ -68,20 +68,20 @@
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel2.Controls.Add(this.importButton, 0, 1);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(637, 3);
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(758, 3);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 2;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 85F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 15F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(194, 555);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(194, 750);
             this.tableLayoutPanel2.TabIndex = 1;
             // 
             // importButton
             // 
             this.importButton.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.importButton.Location = new System.Drawing.Point(3, 474);
+            this.importButton.Location = new System.Drawing.Point(3, 640);
             this.importButton.Name = "importButton";
-            this.importButton.Size = new System.Drawing.Size(188, 78);
+            this.importButton.Size = new System.Drawing.Size(188, 107);
             this.importButton.TabIndex = 0;
             this.importButton.Text = "Import Object";
             this.importButton.UseVisualStyleBackColor = true;
@@ -91,7 +91,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(834, 561);
+            this.ClientSize = new System.Drawing.Size(955, 756);
             this.Controls.Add(this.tableLayoutPanel1);
             this.MinimumSize = new System.Drawing.Size(850, 600);
             this.Name = "Form1";
