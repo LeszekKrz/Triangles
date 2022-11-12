@@ -20,12 +20,30 @@ namespace Triangles
         Pen redPen;
         bool drawLines = true;
 
+        Color objectColor;
+        double kd;
+        double ks;
+        int m;
+        Color lightColor;
+        VertexCoordinates sun;
+        
+
+        SimulationParameters simulationParameters;
+
         public Form1()
         {
             InitializeComponent();
             triangles = new List<Triangle>();
             blackPen = new Pen(Color.Black);
             redPen = new Pen(Color.Red);
+            objectColor = Color.Green;
+            lightColor = Color.White;
+            kd = 0.5;
+            ks = 0.5;
+            m = 100;
+
+            simulationParameters = new SimulationParameters(kd, ks, lightColor, objectColor, m);
+
             Redraw();
         }
 
@@ -39,6 +57,8 @@ namespace Triangles
                 if (triangles != null && triangles.Count > 0)
                 {
                     int size = drawArea.Size.Width - 100;
+                    sun = new VertexCoordinates(0, 0, 1000);
+                    simulationParameters.Sun = sun;
                     if (drawArea.Size.Height < size) size = drawArea.Size.Height;
                     if (drawLines) foreach (Triangle triangle in triangles)
                     {
@@ -46,14 +66,12 @@ namespace Triangles
                         g.DrawLine(blackPen, triangle.B.ToPoint(size), triangle.C.ToPoint(size));
                         g.DrawLine(blackPen, triangle.C.ToPoint(size), triangle.A.ToPoint(size));
                     }
-                    drawArea.Refresh();
+                    //drawArea.Refresh();
                     foreach(Triangle triangle in triangles)
                     {
-                        //g.DrawLine(redPen, triangle.A.ToPoint(size), triangle.B.ToPoint(size));
-                        //g.DrawLine(redPen, triangle.B.ToPoint(size), triangle.C.ToPoint(size));
-                        //g.DrawLine(redPen, triangle.C.ToPoint(size), triangle.A.ToPoint(size));
-                        triangle.PaintTriangle(size, g);
-                        //System.Threading.Thread.Sleep(20);
+                        triangle.PaintTriangle(size, g, simulationParameters);
+                        drawArea.Refresh();
+                        System.Threading.Thread.Sleep(20);
                     }
                 }
             }

@@ -51,6 +51,12 @@ namespace Triangles
             this.y = y;
             this.z = z;
         }
+
+        public static NormalVector operator -(VertexCoordinates u, VertexCoordinates v)
+        {
+            return new NormalVector(u.x - v.x, u.y - v.y, u.z - v.z);
+        }
+          
     }
 
     public class NormalVector
@@ -75,5 +81,28 @@ namespace Triangles
             return new NormalVector(xn / Length, yn / Length, zn / Length);
         }
 
+        public double Product(NormalVector nV)
+        {
+            NormalVector vU = this.GetVersor();
+            NormalVector vV = nV.GetVersor();
+
+            return vU.xn * vV.xn + vU.yn * vV.yn + vU.zn * vV.zn;
+        }
+
+        public double Cosinus(NormalVector nV)
+        {
+            double product = this.Product(nV);
+            return product < 0 ? 0 : product;
+        }
+
+        public static NormalVector operator*(double d, NormalVector v)
+        {
+            return new NormalVector(v.xn * d, v.yn * d, v.zn * d);
+        }
+
+        public static NormalVector operator-(NormalVector u, NormalVector v)
+        {
+            return new NormalVector(u.xn - v.xn, u.yn - v.yn, u.zn - v.zn);
+        }
     }
 }

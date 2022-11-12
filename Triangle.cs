@@ -26,6 +26,7 @@ namespace Triangles
             a = vertices[0];
             b = vertices[1];
             c = vertices[2];
+            brush = new SolidBrush(Color.White);
         }
 
 
@@ -57,7 +58,7 @@ namespace Triangles
             return this[v];
         }
 
-        public void PaintTriangle(int size, Graphics g)
+        public void PaintTriangle(int size, Graphics g, SimulationParameters simulationParameters)
         {
             List<Vertex> vertices = new List<Vertex>() { a, b, c };
             vertices.Sort();
@@ -73,6 +74,10 @@ namespace Triangles
             Point next;
 
             curr = this[indices[k]].ToPoint(size);
+
+            Color colorA = CalculateColor(simulationParameters, this[0]);
+            Color colorB = CalculateColor(simulationParameters, this[1]);
+            Color colorC = CalculateColor(simulationParameters, this[2]);
 
 
             while (y != this[indices[2]].ToPoint(size).Y)
@@ -108,28 +113,92 @@ namespace Triangles
                     k++;
                     curr = this[indices[k]].ToPoint(size);
                 }
-                //Debug.WriteLine("koniec petli AET");
                 AET.Sort();
-            //if (this[indices[0]].Coordinates.Y == this[indices[1]].Coordinates.Y)
-            //{
-            //    Debug.WriteLine("Pozioma");
-            //}
                 for (int i = 0; i < AET.Count; i += 2)
                 {
-                    //Debug.WriteLine($"{(int)Math.Round(AET[i].X)} {(int)Math.Round(AET[i + 1].X)}");
                     for (int j = (int)Math.Round(AET[i].X); j < (int)Math.Round(AET[i + 1].X); j++)
                     {
-                        //Debug.WriteLine($"{(int)Math.Round(AET[i].X)} {j} {(int)Math.Round(AET[i + 1].X)}");
-                        brush = new SolidBrush(Color.Green);
+                        brush.Color = InterpolateColor(colorA, colorB, colorC, new Point(j,y), size);
+                        
                         g.FillRectangle(brush, j, y, 1, 1);
                     }
                     AET[i].Step();
                     AET[i + 1].Step();
                 }
                 y++;
-                //Debug.WriteLine("linia");
             }
             
+            Color CalculateColor(SimulationParameters simulationParameters, Vertex v)
+            {
+                NormalVector L = (simulationParameters.Sun - v.Coordinates).GetVersor();
+                NormalVector N = v.Normal.GetVersor();
+                NormalVector R = 2 * N.Product(L) * N - L;
+
+                double lL = (double)simulationParameters.LightColor.R / 255;
+                double lO = (double)simulationParameters.ObjectColor.R / 255;
+                double l = simulationParameters.Kd * lL * lO * N.Cosinus(L) + simulationParameters.Ks * lL * lO * Math.Pow(simulationParameters.V.Cosinus(R), simulationParameters.M);
+                byte r = (byte)(l * 255);
+
+                lL = (double)simulationParameters.LightColor.G / 255;
+                lO = (double)simulationParameters.ObjectColor.G / 255;
+                l = simulationParameters.Kd * lL * lO * N.Cosinus(L) + simulationParameters.Ks * lL * lO * Math.Pow(simulationParameters.V.Cosinus(R), simulationParameters.M);
+                byte g = (byte)(l * 255);
+            
+            
+                lL = (double)simulationParameters.LightColor.B / 255;
+                lO = (double)simulationParameters.ObjectColor.B / 255;
+                l = simulationParameters.Kd * lL * lO * N.Cosinus(L) + simulationParameters.Ks * lL * lO * Math.Pow(simulationParameters.V.Cosinus(R), simulationParameters.M);
+                byte b = (byte)(l * 255);
+
+                return Color.FromArgb(255, r, g, b);
+            
+            }
+
+            Color InterpolateColor(Color cA, Color cB, Color cC, Point v, int size)
+            {
+                Point pA = a.ToPoint(size);
+                Point pB = this.b.ToPoint(size);
+                Point pC = c.ToPoint(size);
+                double area = Area(pA, pB, pC);
+                double areaA = Area(v, pB, pC);
+                double areaB = Area(pA, v, pC);
+                double areaC = Area(pA, pB, v);
+
+                byte bA, bB, bC;
+
+                bA = cA.R;
+                bB = cB.R;
+                bC = cC.R;
+                byte r = (byte)((bA * areaA / area + bB * areaB / area + bC * areaC / area) * 255);
+
+                bA = cA.G;
+                bB = cB.G;
+                bC = cC.G;
+                byte g = (byte)((bA * areaA / area + bB * areaB / area + bC * areaC / area) * 255);
+
+                bA = cA.B;
+                bB = cB.B;
+                bC = cC.B;
+                byte b = (byte)((bA * areaA / area + bB * areaB / area + bC * areaC / area) * 255);
+
+                return Color.FromArgb(255, r, g, b);
+
+            }
+
+            double Area(Point a, Point b, Point c)
+            {
+                double lA = Distance(a, b);
+                double lB = Distance(b, c);
+                double lC = Distance(c, a);
+                double p = (lA + lB + lC) / 2;
+
+                return Math.Sqrt(p * (p - lA) * (p - lB) * (p - lC));
+            }
+
+            double Distance(Point a, Point b)
+            {
+                return Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
+            }
         }
     }
 
