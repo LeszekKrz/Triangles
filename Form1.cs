@@ -18,7 +18,7 @@ namespace Triangles
         List<Triangle> triangles;
         Pen blackPen;
         Pen redPen;
-        bool drawLines = true;
+        bool drawLines = false;
 
         Color objectColor;
         double kd;
@@ -40,8 +40,10 @@ namespace Triangles
             lightColor = Color.White;
             kd = 0.5;
             ks = 0.5;
-            m = 100;
+            m = 1;
 
+            sun = new VertexCoordinates(0, 0, 2);
+            
             simulationParameters = new SimulationParameters(kd, ks, lightColor, objectColor, m);
 
             Redraw();
@@ -50,14 +52,12 @@ namespace Triangles
         public void Redraw()
         {
             drawArea.Image = new Bitmap(drawArea.Size.Width, drawArea.Size.Height);
-            Debug.WriteLine($"{drawArea.Width} {drawArea.Height}");
             using (Graphics g = Graphics.FromImage(drawArea.Image))
             {
                 g.Clear(Color.White);
                 if (triangles != null && triangles.Count > 0)
                 {
                     int size = drawArea.Size.Width - 100;
-                    sun = new VertexCoordinates(0, 0, 1000);
                     simulationParameters.Sun = sun;
                     if (drawArea.Size.Height < size) size = drawArea.Size.Height;
                     if (drawLines) foreach (Triangle triangle in triangles)
@@ -151,8 +151,19 @@ namespace Triangles
             {
                 Height += drawArea.Width - drawArea.Height;
             }
-            Debug.WriteLine($"{-1 % 3}");
             Redraw();
+        }
+
+        private void animationButton_Click(object sender, EventArgs e)
+        {
+            for (int i = -2; i <= 2; i++)
+            {
+                for (int j = -2; j <= 2; j++)
+                {
+                    sun = new VertexCoordinates(i, j, 2);
+                    Redraw();
+                }
+            }
         }
     }
 }
