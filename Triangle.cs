@@ -82,20 +82,8 @@ namespace Triangles
             while (y != this[indices[2]].ToPoint(size).Y)
             {
                 StepAET(y, indices, size, ref curr, ref k, AET);
-                for (int i = 0; i < AET.Count; i += 2)
-                {
-                    brush.Color = InterpolateColorOnLine(AET[i], new Point((int)AET[i].X, y));
-                    g.FillRectangle(brush, (int)Math.Round(AET[i].X), y, 1, 1);
-                    for (int j = (int)Math.Round(AET[i].X) + 1; j < (int)Math.Round(AET[i + 1].X); j++)
-                    {
-                        brush.Color = InterpolateColor(colors[0], colors[1], colors[2], new Point(j,y), size);
-                        g.FillRectangle(brush, j, y, 1, 1);
-                    }
-                    brush.Color = InterpolateColorOnLine(AET[i + 1], new Point((int)AET[i + 1].X, y));
-                    g.FillRectangle(brush, (int)Math.Round(AET[i + 1].X), y, 1, 1);
-                    AET[i].Step();
-                    AET[i + 1].Step();
-                }
+                //PaintAETwithInterpolatedColor(AET, y, size, g);
+                PaintAETwithInterpolatedVectors(AET, y, size, g, simulationParameters);
                 y++;
             }
         }
@@ -127,6 +115,76 @@ namespace Triangles
                 curr = this[indices[k]].ToPoint(size);
             }
             AET.Sort();
+        }
+
+        void PaintAETwithInterpolatedColor(List<ActiveEdge> AET, int y, int size, Graphics g)
+        {
+            for (int i = 0; i < AET.Count; i += 2)
+            {
+                brush.Color = InterpolateColorOnLine(AET[i], new Point((int)AET[i].X, y));
+                g.FillRectangle(brush, (int)Math.Round(AET[i].X), y, 1, 1);
+                for (int j = (int)Math.Round(AET[i].X) + 1; j < (int)Math.Round(AET[i + 1].X); j++)
+                {
+                    brush.Color = InterpolateColor(colors[0], colors[1], colors[2], new Point(j, y), size);
+                    g.FillRectangle(brush, j, y, 1, 1);
+                }
+                brush.Color = InterpolateColorOnLine(AET[i + 1], new Point((int)AET[i + 1].X, y));
+                g.FillRectangle(brush, (int)Math.Round(AET[i + 1].X), y, 1, 1);
+                AET[i].Step();
+                AET[i + 1].Step();
+            }
+        }
+
+        void PaintAETwithInterpolatedVectors(List<ActiveEdge> AET, int y, int size, Graphics g, SimulationParameters simulationParameters)
+        {
+            for (int i = 0; i < AET.Count; i += 2)
+            {
+                Vertex interpolated = InterpolateVertexOnEdge(new Point((int)AET[i].X, y), AET[i]);
+                brush.Color = CalculateColor(simulationParameters, interpolated);
+                g.FillRectangle(brush, (int)Math.Round(AET[i].X), y, 1, 1);
+                for (int j = (int)Math.Round(AET[i].X) + 1; j < (int)Math.Round(AET[i + 1].X); j++)
+                {
+                    interpolated = InterpolateVertexInTriangle(new Point(j, y));
+                    brush.Color = CalculateColor(simulationParameters, interpolated);
+                    g.FillRectangle(brush, j, y, 1, 1);
+                }
+                interpolated = InterpolateVertexOnEdge(new Point((int)AET[i + 1].X, y), AET[i+1]);
+                brush.Color = CalculateColor(simulationParameters, interpolated);
+                g.FillRectangle(brush, (int)Math.Round(AET[i + 1].X), y, 1, 1);
+                AET[i].Step();
+                AET[i + 1].Step();
+            }
+        }
+
+        Vertex InterpolateVertexOnEdge(Point v, ActiveEdge edge)
+        {
+            Vertex beginning = this[edge.I];
+            Vertex end = this[edge.J];
+            EdgeRatios ratios = new EdgeRatios(points[edge.I], points[edge.J], v);
+            double x = ratios.Interpolate(beginning.Coordinates.X, end.Coordinates.X);
+            double y = ratios.Interpolate(beginning.Coordinates.Y, end.Coordinates.Y);
+            double z = ratios.Interpolate(beginning.Coordinates.Z, end.Coordinates.Z);
+            VertexCoordinates coordinates = new VertexCoordinates(x, y, z);
+            double nx = ratios.Interpolate(beginning.Normal.Xn, end.Normal.Xn);
+            double ny = ratios.Interpolate(beginning.Normal.Yn, end.Normal.Yn);
+            double nz = ratios.Interpolate(beginning.Normal.Zn, end.Normal.Zn);
+            NormalVector vector = new NormalVector(nx, ny, nz);
+            return new Vertex(coordinates, vector);
+        }
+
+        Vertex InterpolateVertexInTriangle(Point v)
+        {
+            TriangleRatios ratios = new TriangleRatios(points[0], points[1], points[2], v);
+            double x = ratios.Interpolate(a.Coordinates.X, b.Coordinates.X, c.Coordinates.X);
+            double y = ratios.Interpolate(a.Coordinates.Y, b.Coordinates.Y, c.Coordinates.Y);
+            double z = ratios.Interpolate(a.Coordinates.Z, b.Coordinates.Z, c.Coordinates.Z);
+            VertexCoordinates coordinates = new VertexCoordinates(x, y, z);
+            double nx = ratios.Interpolate(a.Normal.Xn, b.Normal.Xn, c.Normal.Xn);
+            double ny = ratios.Interpolate(a.Normal.Yn, b.Normal.Yn, c.Normal.Yn);
+            double nz = ratios.Interpolate(a.Normal.Zn, b.Normal.Zn, c.Normal.Zn);
+            NormalVector vector = new NormalVector(nx, ny, nz);
+            return new Vertex(coordinates, vector);
+            
         }
 
         Color CalculateColor(SimulationParameters simulationParameters, Vertex v)
