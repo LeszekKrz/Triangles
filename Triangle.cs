@@ -30,6 +30,9 @@ namespace Triangles
             b = vertices[1];
             c = vertices[2];
             brush = new SolidBrush(Color.White);
+
+            colors = new Color[0];
+            points = new Point[0];
         }
 
 
@@ -41,7 +44,7 @@ namespace Triangles
                     case 0: return a;
                     case 1: return b;
                     case 2: return c;
-                    default: return null;
+                    default: return new Vertex(new VertexCoordinates(0,0,0), new NormalVector(0,0,0));
                 }
             }
         }
@@ -75,7 +78,6 @@ namespace Triangles
             AET = new List<ActiveEdge>();
             int k = 0;
             Point curr = this[indices[0]].ToPoint(size);
-            Point prev, next;
 
             while (y != this[indices[2]].ToPoint(size).Y)
             {
@@ -232,7 +234,8 @@ namespace Triangles
 
         public int CompareTo(ActiveEdge? other)
         {
-            return x.CompareTo(other.x);
+            if (other != null) return x.CompareTo(other.x);
+            else return 1;
         }
 
         public override bool Equals(object? obj)
@@ -244,6 +247,11 @@ namespace Triangles
         public void Step()
         {
             x += m;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
     }
 
