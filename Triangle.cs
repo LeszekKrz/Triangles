@@ -72,39 +72,14 @@ namespace Triangles
 
             colors = new Color[3] { CalculateColor(simulationParameters, this[0]), CalculateColor(simulationParameters, this[1]), CalculateColor(simulationParameters, this[2]) };
             points = new Point[3] { a.ToPoint(size), b.ToPoint(size), c.ToPoint(size) };
-                AET = new List<ActiveEdge>();
-                int k = 0;
-                Point curr = this[indices[k]].ToPoint(size);
+            AET = new List<ActiveEdge>();
+            int k = 0;
+            Point curr = this[indices[0]].ToPoint(size);
+            Point prev, next;
 
             while (y != this[indices[2]].ToPoint(size).Y)
             {
-                //List<ActiveEdge> AET = new List<ActiveEdge>();
-                Point prev, next;
-                while (y == curr.Y)
-                {
-                    prev = this[indices[k] + 3 - 1].ToPoint(size);
-                    if (prev.Y > curr.Y)
-                    {
-                        AET.Add(new ActiveEdge(indices[k], indices[k] - 1, curr.X, Angle(curr, prev)));
-                    }
-                    else if (prev.Y < curr.Y)
-                    {
-                        AET.Remove(new ActiveEdge(indices[k] - 1, indices[k]));
-                    }
-                    next = this[indices[k] + 1].ToPoint(size);
-                    if (next.Y > curr.Y)
-                    {
-                        AET.Add(new ActiveEdge(indices[k], indices[k] + 1, curr.X, Angle(curr, next)));
-                    }
-                    else if (next.Y < curr.Y)
-                    {
-                        AET.Remove(new ActiveEdge(indices[k] + 1, indices[k]));
-                    }
-                    k++;
-                    curr = this[indices[k]].ToPoint(size);
-                }
-                AET.Sort();
-                //AET = GetAET(y, indices, size);
+                StepAET(y, indices, size, ref curr, ref k, AET);
                 for (int i = 0; i < AET.Count; i += 2)
                 {
                     brush.Color = InterpolateColorOnLine(AET[i], new Point((int)AET[i].X, y));
@@ -123,11 +98,8 @@ namespace Triangles
             }
         }
 
-        List<ActiveEdge> GetAET(int y, int[] indices, int size)
+        void StepAET(int y, int[] indices, int size,ref Point curr, ref int k, List<ActiveEdge> AET)
         {
-            List<ActiveEdge> AET = new List<ActiveEdge>();
-            int k = 0;
-            Point curr = this[indices[k]].ToPoint(size);
             Point prev, next;
             while (y == curr.Y)
             {
@@ -153,7 +125,6 @@ namespace Triangles
                 curr = this[indices[k]].ToPoint(size);
             }
             AET.Sort();
-            return AET;
         }
 
         Color CalculateColor(SimulationParameters simulationParameters, Vertex v)
