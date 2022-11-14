@@ -70,8 +70,8 @@ namespace Triangles
                     foreach(Triangle triangle in triangles)
                     {
                         triangle.PaintTriangle(size, g, simulationParameters);
-                        drawArea.Refresh();
-                        System.Threading.Thread.Sleep(20);
+                        //drawArea.Refresh();
+                        //System.Threading.Thread.Sleep(20);
                     }
                 }
             }

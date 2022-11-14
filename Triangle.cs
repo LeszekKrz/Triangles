@@ -67,22 +67,19 @@ namespace Triangles
             vertices.Sort();
             int[] indices = vertices.Select(v => this[v]).ToArray();
 
-            List<ActiveEdge> AET = new List<ActiveEdge>();
+            List<ActiveEdge> AET;
             int y = this[indices[0]].ToPoint(size).Y;
-
-            int k = 0;
-
-            Point curr;
-            Point prev;
-            Point next;
-
-            curr = this[indices[k]].ToPoint(size);
 
             colors = new Color[3] { CalculateColor(simulationParameters, this[0]), CalculateColor(simulationParameters, this[1]), CalculateColor(simulationParameters, this[2]) };
             points = new Point[3] { a.ToPoint(size), b.ToPoint(size), c.ToPoint(size) };
+                AET = new List<ActiveEdge>();
+                int k = 0;
+                Point curr = this[indices[k]].ToPoint(size);
 
             while (y != this[indices[2]].ToPoint(size).Y)
             {
+                //List<ActiveEdge> AET = new List<ActiveEdge>();
+                Point prev, next;
                 while (y == curr.Y)
                 {
                     prev = this[indices[k] + 3 - 1].ToPoint(size);
@@ -97,7 +94,7 @@ namespace Triangles
                     next = this[indices[k] + 1].ToPoint(size);
                     if (next.Y > curr.Y)
                     {
-                        AET.Add(new ActiveEdge(indices[k], indices[k] + 1, curr.X, Angle(curr,next)));
+                        AET.Add(new ActiveEdge(indices[k], indices[k] + 1, curr.X, Angle(curr, next)));
                     }
                     else if (next.Y < curr.Y)
                     {
@@ -107,6 +104,7 @@ namespace Triangles
                     curr = this[indices[k]].ToPoint(size);
                 }
                 AET.Sort();
+                //AET = GetAET(y, indices, size);
                 for (int i = 0; i < AET.Count; i += 2)
                 {
                     brush.Color = InterpolateColorOnLine(AET[i], new Point((int)AET[i].X, y));
@@ -123,61 +121,93 @@ namespace Triangles
                 }
                 y++;
             }
-            
-            Color CalculateColor(SimulationParameters simulationParameters, Vertex v)
+        }
+
+        List<ActiveEdge> GetAET(int y, int[] indices, int size)
+        {
+            List<ActiveEdge> AET = new List<ActiveEdge>();
+            int k = 0;
+            Point curr = this[indices[k]].ToPoint(size);
+            Point prev, next;
+            while (y == curr.Y)
             {
-                NormalVector L = (simulationParameters.Sun - v.Coordinates).GetVersor();
-                NormalVector N = v.Normal.GetVersor();
-                NormalVector R = 2 * N.Product(L) * N - L;
-
-                double lL, lO;
-                lL = (double)simulationParameters.LightColor.R / 255;
-                lO = (double)simulationParameters.ObjectColor.R / 255;
-                double l = simulationParameters.Kd * lL * lO * N.Cosinus(L) + simulationParameters.Ks * lL * lO * Math.Pow(simulationParameters.V.Cosinus(R), simulationParameters.M);
-                byte r = (byte)(l * 255);
-
-                lL = (double)simulationParameters.LightColor.G / 255;
-                lO = (double)simulationParameters.ObjectColor.G / 255;
-                l = simulationParameters.Kd * lL * lO * N.Cosinus(L) + simulationParameters.Ks * lL * lO * Math.Pow(simulationParameters.V.Cosinus(R), simulationParameters.M);
-                byte g = (byte)(l * 255);
-            
-            
-                lL = (double)simulationParameters.LightColor.B / 255;
-                lO = (double)simulationParameters.ObjectColor.B / 255;
-                l = simulationParameters.Kd * lL * lO * N.Cosinus(L) + simulationParameters.Ks * lL * lO * Math.Pow(simulationParameters.V.Cosinus(R), simulationParameters.M);
-                byte b = (byte)(l * 255);
-
-                return Color.FromArgb(255, r, g, b);
-            
+                prev = this[indices[k] + 3 - 1].ToPoint(size);
+                if (prev.Y > curr.Y)
+                {
+                    AET.Add(new ActiveEdge(indices[k], indices[k] - 1, curr.X, Angle(curr, prev)));
+                }
+                else if (prev.Y < curr.Y)
+                {
+                    AET.Remove(new ActiveEdge(indices[k] - 1, indices[k]));
+                }
+                next = this[indices[k] + 1].ToPoint(size);
+                if (next.Y > curr.Y)
+                {
+                    AET.Add(new ActiveEdge(indices[k], indices[k] + 1, curr.X, Angle(curr, next)));
+                }
+                else if (next.Y < curr.Y)
+                {
+                    AET.Remove(new ActiveEdge(indices[k] + 1, indices[k]));
+                }
+                k++;
+                curr = this[indices[k]].ToPoint(size);
             }
+            AET.Sort();
+            return AET;
+        }
 
-            Color InterpolateColor(Color cA, Color cB, Color cC, Point v, int size)
-            {
-                TriangleRatios ratios = new TriangleRatios(this.a.ToPoint(size), this.b.ToPoint(size), this.c.ToPoint(size), v);
+        Color CalculateColor(SimulationParameters simulationParameters, Vertex v)
+        {
+            NormalVector L = (simulationParameters.Sun - v.Coordinates).GetVersor();
+            NormalVector N = v.Normal.GetVersor();
+            NormalVector R = 2 * N.Product(L) * N - L;
 
-                byte r = (byte)ratios.Interpolate(cA.R, cB.R, cC.R);
-                byte g = (byte)ratios.Interpolate(cA.G, cB.G, cC.G);
-                byte b = (byte)ratios.Interpolate(cA.B, cB.B, cC.B);
+            double lL, lO;
+            lL = (double)simulationParameters.LightColor.R / 255;
+            lO = (double)simulationParameters.ObjectColor.R / 255;
+            double l = simulationParameters.Kd * lL * lO * N.Cosinus(L) + simulationParameters.Ks * lL * lO * Math.Pow(simulationParameters.V.Cosinus(R), simulationParameters.M);
+            byte r = (byte)(l * 255);
 
-                return Color.FromArgb(255, r, g, b);
-
-            }
-
-            Color InterpolateColorOnLine(ActiveEdge edge, Point v)
-            {
-
-                Color cA = colors[edge.I];
-                Color cB = colors[edge.J];
-
-                EdgeRatios ratios = new EdgeRatios(points[edge.I], points[edge.J], v);
-                byte r = (byte)ratios.Interpolate(cA.R, cB.R);
-                byte g = (byte)ratios.Interpolate(cA.G, cB.G);
-                byte b = (byte)ratios.Interpolate(cA.B, cB.B);
-
-                return Color.FromArgb(255, r, g, b);
+            lL = (double)simulationParameters.LightColor.G / 255;
+            lO = (double)simulationParameters.ObjectColor.G / 255;
+            l = simulationParameters.Kd * lL * lO * N.Cosinus(L) + simulationParameters.Ks * lL * lO * Math.Pow(simulationParameters.V.Cosinus(R), simulationParameters.M);
+            byte g = (byte)(l * 255);
 
 
-            }
+            lL = (double)simulationParameters.LightColor.B / 255;
+            lO = (double)simulationParameters.ObjectColor.B / 255;
+            l = simulationParameters.Kd * lL * lO * N.Cosinus(L) + simulationParameters.Ks * lL * lO * Math.Pow(simulationParameters.V.Cosinus(R), simulationParameters.M);
+            byte b = (byte)(l * 255);
+
+            return Color.FromArgb(255, r, g, b);
+
+        }
+
+        Color InterpolateColor(Color cA, Color cB, Color cC, Point v, int size)
+        {
+            TriangleRatios ratios = new TriangleRatios(this.a.ToPoint(size), this.b.ToPoint(size), this.c.ToPoint(size), v);
+
+            byte r = (byte)ratios.Interpolate(cA.R, cB.R, cC.R);
+            byte g = (byte)ratios.Interpolate(cA.G, cB.G, cC.G);
+            byte b = (byte)ratios.Interpolate(cA.B, cB.B, cC.B);
+
+            return Color.FromArgb(255, r, g, b);
+
+        }
+
+        Color InterpolateColorOnLine(ActiveEdge edge, Point v)
+        {
+
+            Color cA = colors[edge.I];
+            Color cB = colors[edge.J];
+
+            EdgeRatios ratios = new EdgeRatios(points[edge.I], points[edge.J], v);
+            byte r = (byte)ratios.Interpolate(cA.R, cB.R);
+            byte g = (byte)ratios.Interpolate(cA.G, cB.G);
+            byte b = (byte)ratios.Interpolate(cA.B, cB.B);
+
+            return Color.FromArgb(255, r, g, b);
+
 
         }
         static public double Area(Point a, Point b, Point c)
@@ -222,6 +252,7 @@ namespace Triangles
             this.j = j >= 0 ? j % 3 : (j + 3) % 3;
 
             this.x = x;
+            this.m = m;
         }
 
         public ActiveEdge(int i, int j): this(i,j,0,0)
