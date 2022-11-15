@@ -22,8 +22,11 @@ namespace Triangles
         bool drawLines = false;
 
         Color objectColor;
+        Color lightColor;
         double kd;
         double ks;
+        double z;
+        int m;
 
         double r;
         double angle;
@@ -31,8 +34,6 @@ namespace Triangles
         int increasing;
 
 
-        int m;
-        Color lightColor;
         VertexCoordinates sun;
         
 
@@ -41,14 +42,18 @@ namespace Triangles
         public Form1()
         {
             InitializeComponent();
+            drawArea.Image = new Bitmap(drawArea.Size.Width, drawArea.Size.Height);
+
             triangles = new List<Triangle>();
             blackPen = new Pen(Color.Black);
             redPen = new Pen(Color.Red);
-            objectColor = Color.Green;
+            //objectColor = Color.Green;
+            objectColor = Color.Orange;
             lightColor = Color.White;
             kd = 0;
             ks = 0;
             m = 1;
+            z = 2;
 
             timer = new System.Windows.Forms.Timer();
             timer.Interval = 50;
@@ -56,12 +61,15 @@ namespace Triangles
 
             drawArea.Image = new Bitmap(drawArea.Size.Width, drawArea.Size.Height);
 
-            sun = new VertexCoordinates(0, 0, 2);
+            sun = new VertexCoordinates(0, 0, z);
             r = 0;
             step = Math.PI / 8;
             angle = 0;
             simulationParameters = new SimulationParameters(kd, ks, lightColor, objectColor, m);
             increasing = 1;
+
+            RefreshObjectPicture();
+            RefreshLightPicture();
 
             Redraw();
         }
@@ -69,12 +77,11 @@ namespace Triangles
         public void Redraw()
         {
             simulationParameters = new SimulationParameters(kd, ks, lightColor, objectColor, m);
-            drawArea.Image = new Bitmap(drawArea.Size.Width, drawArea.Size.Height);
+            //drawArea.Image = new Bitmap(drawArea.Size.Width, drawArea.Size.Height);
             using (Graphics g = Graphics.FromImage(drawArea.Image))
             {
                 g.Clear(Color.White);
                 int size = drawArea.Size.Width - 100;
-                Point pSun = new Vertex(sun, new NormalVector(0, 0, 0)).ToPoint(size);
                 if (triangles != null && triangles.Count > 0)
                 {
                     simulationParameters.Sun = sun;
@@ -165,6 +172,7 @@ namespace Triangles
             {
                 Height += drawArea.Width - drawArea.Height;
             }
+            drawArea.Image = new Bitmap(drawArea.Size.Width, drawArea.Size.Height);
             Redraw();
         }
 
@@ -197,7 +205,7 @@ namespace Triangles
                 angle += step * 8;
             }
             angle += step;
-            sun = new VertexCoordinates(Math.Cos(angle) * r, Math.Sin(angle) * r, 2);
+            sun = new VertexCoordinates(Math.Cos(angle) * r, Math.Sin(angle) * r, z);
             Redraw();
         }
 
@@ -211,6 +219,71 @@ namespace Triangles
         {
             kd = (double)kdBar.Value / (kdBar.Maximum + 1);
             Redraw();
+        }
+
+        private void mBar_ValueChanged(object sender, EventArgs e)
+        {
+            m = mBar.Value;
+            Redraw();
+        }
+
+        private void zBar_ValueChanged(object sender, EventArgs e)
+        {
+            z = (double)zBar.Value / 10;
+            sun = new VertexCoordinates(sun.X, sun.Y, z);
+            Redraw();
+        }
+
+        private void objectColorButton_Click(object sender, EventArgs e)
+        {
+            ColorDialog colorDialog = new ColorDialog();
+            if (colorDialog.ShowDialog() == DialogResult.OK)
+            {
+                objectColor = colorDialog.Color;
+                RefreshObjectPicture();
+                Redraw();
+            }
+        }
+
+        private void objectPicture_SizeChanged(object sender, EventArgs e)
+        {
+            RefreshObjectPicture();
+        }
+
+        private void RefreshObjectPicture()
+        {
+            objectPicture.Image = new Bitmap(objectPicture.Width, objectPicture.Height);
+            using (Graphics g = Graphics.FromImage(objectPicture.Image))
+            {
+                g.Clear(objectColor);
+            }
+            objectPicture.Refresh();
+        }
+
+        private void lightPicture_SizeChanged(object sender, EventArgs e)
+        {
+            RefreshLightPicture();
+        }
+
+        private void lightColorButton_Click(object sender, EventArgs e)
+        {
+            ColorDialog colorDialog = new ColorDialog();
+            if (colorDialog.ShowDialog() == DialogResult.OK)
+            {
+                lightColor = colorDialog.Color;
+                RefreshLightPicture();
+                Redraw();
+            }
+        }
+
+        private void RefreshLightPicture()
+        {
+            lightPicture.Image = new Bitmap(lightPicture.Width, lightPicture.Height);
+            using (Graphics g = Graphics.FromImage(lightPicture.Image))
+            {
+                g.Clear(lightColor);
+            }
+            lightPicture.Refresh();
         }
     }
 }

@@ -191,23 +191,29 @@ namespace Triangles
         {
             NormalVector L = (simulationParameters.Sun - v.Coordinates).GetVersor();
             NormalVector N = v.Normal.GetVersor();
-            NormalVector R = 2 * N.Product(L) * N - L;
+            NormalVector R = (2 * N.Product(L) * N - L);
 
             double lL, lO;
             lL = (double)simulationParameters.LightColor.R / 255;
             lO = (double)simulationParameters.ObjectColor.R / 255;
             double l = simulationParameters.Kd * lL * lO * N.Cosinus(L) + simulationParameters.Ks * lL * lO * Math.Pow(simulationParameters.V.Cosinus(R), simulationParameters.M);
+            
+            if (l > 1) l = 1;
             byte r = (byte)(l * 255);
 
             lL = (double)simulationParameters.LightColor.G / 255;
             lO = (double)simulationParameters.ObjectColor.G / 255;
             l = simulationParameters.Kd * lL * lO * N.Cosinus(L) + simulationParameters.Ks * lL * lO * Math.Pow(simulationParameters.V.Cosinus(R), simulationParameters.M);
+
+            if (l > 1) l = 1;
             byte g = (byte)(l * 255);
 
 
             lL = (double)simulationParameters.LightColor.B / 255;
             lO = (double)simulationParameters.ObjectColor.B / 255;
             l = simulationParameters.Kd * lL * lO * N.Cosinus(L) + simulationParameters.Ks * lL * lO * Math.Pow(simulationParameters.V.Cosinus(R), simulationParameters.M);
+
+            if (l > 1) l = 1;
             byte b = (byte)(l * 255);
 
             return Color.FromArgb(255, r, g, b);
@@ -233,9 +239,15 @@ namespace Triangles
             Color cB = colors[edge.J];
 
             EdgeRatios ratios = new EdgeRatios(points[edge.I], points[edge.J], v);
-            byte r = (byte)ratios.Interpolate(cA.R, cB.R);
-            byte g = (byte)ratios.Interpolate(cA.G, cB.G);
-            byte b = (byte)ratios.Interpolate(cA.B, cB.B);
+            double dr = ratios.Interpolate(cA.R, cB.R);
+            if (dr > 255) dr = 255;
+            byte r = (byte)dr;
+            double dg = ratios.Interpolate(cA.G, cB.G);
+            if (dg > 255) dg = 255;
+            byte g = (byte)dg;
+            double db = ratios.Interpolate(cA.B, cB.B);
+            if (db > 255) db = 255;
+            byte b = (byte)db;
 
             return Color.FromArgb(255, r, g, b);
 
