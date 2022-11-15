@@ -15,6 +15,7 @@ namespace Triangles
 {
     public partial class Form1 : Form
     {
+        System.Windows.Forms.Timer timer;
         List<Triangle> triangles;
         Pen blackPen;
         Pen redPen;
@@ -23,6 +24,13 @@ namespace Triangles
         Color objectColor;
         double kd;
         double ks;
+
+        double r;
+        double angle;
+        double step;
+        int increasing;
+
+
         int m;
         Color lightColor;
         VertexCoordinates sun;
@@ -38,26 +46,37 @@ namespace Triangles
             redPen = new Pen(Color.Red);
             objectColor = Color.Green;
             lightColor = Color.White;
-            kd = 0.5;
-            ks = 0.5;
+            kd = 0;
+            ks = 0;
             m = 1;
 
+            timer = new System.Windows.Forms.Timer();
+            timer.Interval = 50;
+            timer.Tick += new EventHandler(TimerTick);
+
+            drawArea.Image = new Bitmap(drawArea.Size.Width, drawArea.Size.Height);
+
             sun = new VertexCoordinates(0, 0, 2);
-            
+            r = 0;
+            step = Math.PI / 8;
+            angle = 0;
             simulationParameters = new SimulationParameters(kd, ks, lightColor, objectColor, m);
+            increasing = 1;
 
             Redraw();
         }
 
         public void Redraw()
         {
+            simulationParameters = new SimulationParameters(kd, ks, lightColor, objectColor, m);
             drawArea.Image = new Bitmap(drawArea.Size.Width, drawArea.Size.Height);
             using (Graphics g = Graphics.FromImage(drawArea.Image))
             {
                 g.Clear(Color.White);
+                int size = drawArea.Size.Width - 100;
+                Point pSun = new Vertex(sun, new NormalVector(0, 0, 0)).ToPoint(size);
                 if (triangles != null && triangles.Count > 0)
                 {
-                    int size = drawArea.Size.Width - 100;
                     simulationParameters.Sun = sun;
                     if (drawArea.Size.Height < size) size = drawArea.Size.Height;
                     if (drawLines) foreach (Triangle triangle in triangles)
@@ -140,11 +159,6 @@ namespace Triangles
             GetTrianglesFromFile();
         }
 
-        //private void drawArea_SizeChanged(object sender, EventArgs e)
-        //{
-        //    Redraw();
-        //}
-
         private void Form1_ResizeEnd(object sender, EventArgs e)
         {
             if (drawArea.Width != drawArea.Height)
@@ -156,14 +170,47 @@ namespace Triangles
 
         private void animationButton_Click(object sender, EventArgs e)
         {
-            for (int i = -2; i <= 2; i++)
+            if (timer.Enabled == true)
             {
-                for (int j = -2; j <= 2; j++)
-                {
-                    sun = new VertexCoordinates(i, j, 2);
-                    Redraw();
-                }
+                timer.Enabled = false;
+                animationButton.Text = "Start animation";
             }
+            else
+            {
+                timer.Enabled = true;
+                animationButton.Text = "Stop animation";
+            }
+        }
+
+        private void TimerTick(object? sender, EventArgs e)
+        {
+            r += increasing * 0.1;
+            if (r >= 3)
+            {
+                r = 3;
+                increasing = -1;
+            }
+            if (r <= 0)
+            {
+                r = 0;
+                increasing = 1;
+                angle += step * 8;
+            }
+            angle += step;
+            sun = new VertexCoordinates(Math.Cos(angle) * r, Math.Sin(angle) * r, 2);
+            Redraw();
+        }
+
+        private void ksBar_ValueChanged(object sender, EventArgs e)
+        {
+            ks = (double)ksBar.Value / (ksBar.Maximum + 1);
+            Redraw();
+        }
+
+        private void kdBar_ValueChanged(object sender, EventArgs e)
+        {
+            kd = (double)kdBar.Value / (kdBar.Maximum + 1);
+            Redraw();
         }
     }
 }

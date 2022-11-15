@@ -82,8 +82,8 @@ namespace Triangles
             while (y != this[indices[2]].ToPoint(size).Y)
             {
                 StepAET(y, indices, size, ref curr, ref k, AET);
-                //PaintAETwithInterpolatedColor(AET, y, size, g);
-                PaintAETwithInterpolatedVectors(AET, y, size, g, simulationParameters);
+                PaintAETwithInterpolatedColor(AET, y, size, g);
+                //PaintAETwithInterpolatedVectors(AET, y, size, g, simulationParameters);
                 y++;
             }
         }
