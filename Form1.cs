@@ -56,7 +56,7 @@ namespace Triangles
             z = 2;
 
             timer = new System.Windows.Forms.Timer();
-            timer.Interval = 50;
+            timer.Interval = 10;
             timer.Tick += new EventHandler(TimerTick);
 
             drawArea.Image = new Bitmap(drawArea.Size.Width, drawArea.Size.Height);
@@ -95,7 +95,7 @@ namespace Triangles
                     //drawArea.Refresh();
                     foreach(Triangle triangle in triangles)
                     {
-                        triangle.PaintTriangle(size, g, simulationParameters);
+                        triangle.PaintTriangle(size, g, simulationParameters, interpolateColorRadio.Checked);
                         //drawArea.Refresh();
                         //System.Threading.Thread.Sleep(20);
                     }
@@ -284,6 +284,11 @@ namespace Triangles
                 g.Clear(lightColor);
             }
             lightPicture.Refresh();
+        }
+
+        private void interpolateColorRadio_CheckedChanged(object sender, EventArgs e)
+        {
+            Redraw();
         }
     }
 }

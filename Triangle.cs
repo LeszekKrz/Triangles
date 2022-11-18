@@ -64,7 +64,7 @@ namespace Triangles
             return this[v];
         }
 
-        public void PaintTriangle(int size, Graphics g, SimulationParameters simulationParameters)
+        public void PaintTriangle(int size, Graphics g, SimulationParameters simulationParameters, bool interpolateColors)
         {
             List<Vertex> vertices = new List<Vertex>() { a, b, c };
             vertices.Sort();
@@ -82,8 +82,8 @@ namespace Triangles
             while (y != this[indices[2]].ToPoint(size).Y)
             {
                 StepAET(y, indices, size, ref curr, ref k, AET);
-                PaintAETwithInterpolatedColor(AET, y, size, g);
-                //PaintAETwithInterpolatedVectors(AET, y, size, g, simulationParameters);
+                if (interpolateColors) PaintAETwithInterpolatedColor(AET, y, size, g);
+                else PaintAETwithInterpolatedVectors(AET, y, size, g, simulationParameters);
                 y++;
             }
         }

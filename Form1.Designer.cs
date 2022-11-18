@@ -47,6 +47,9 @@
             this.objectColorButton = new System.Windows.Forms.Button();
             this.lightPicture = new System.Windows.Forms.PictureBox();
             this.lightColorButton = new System.Windows.Forms.Button();
+            this.interpolateBox = new System.Windows.Forms.GroupBox();
+            this.radioButton2 = new System.Windows.Forms.RadioButton();
+            this.interpolateColorRadio = new System.Windows.Forms.RadioButton();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.drawArea)).BeginInit();
             this.tableLayoutPanel2.SuspendLayout();
@@ -58,6 +61,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.zBar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.objectPicture)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.lightPicture)).BeginInit();
+            this.interpolateBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -116,21 +120,23 @@
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel3.Controls.Add(this.animationButton, 0, 1);
             this.tableLayoutPanel3.Controls.Add(this.tableLayoutPanel4, 0, 0);
+            this.tableLayoutPanel3.Controls.Add(this.interpolateBox, 0, 2);
             this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel3.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
-            this.tableLayoutPanel3.RowCount = 2;
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 90F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
+            this.tableLayoutPanel3.RowCount = 3;
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 15F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 15F));
             this.tableLayoutPanel3.Size = new System.Drawing.Size(188, 349);
             this.tableLayoutPanel3.TabIndex = 1;
             // 
             // animationButton
             // 
             this.animationButton.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.animationButton.Location = new System.Drawing.Point(3, 317);
+            this.animationButton.Location = new System.Drawing.Point(3, 247);
             this.animationButton.Name = "animationButton";
-            this.animationButton.Size = new System.Drawing.Size(182, 29);
+            this.animationButton.Size = new System.Drawing.Size(182, 46);
             this.animationButton.TabIndex = 0;
             this.animationButton.Text = "Start animation";
             this.animationButton.UseVisualStyleBackColor = true;
@@ -164,7 +170,7 @@
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.28571F));
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.28571F));
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.28571F));
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(182, 310);
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(182, 240);
             this.tableLayoutPanel4.TabIndex = 1;
             // 
             // label1
@@ -173,7 +179,7 @@
             this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label1.Location = new System.Drawing.Point(3, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(38, 51);
+            this.label1.Size = new System.Drawing.Size(38, 40);
             this.label1.TabIndex = 0;
             this.label1.Text = "k_s:";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -185,7 +191,7 @@
             this.ksBar.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ksBar.Maximum = 19;
             this.ksBar.Name = "ksBar";
-            this.ksBar.Size = new System.Drawing.Size(132, 47);
+            this.ksBar.Size = new System.Drawing.Size(132, 36);
             this.ksBar.TabIndex = 1;
             this.ksBar.ValueChanged += new System.EventHandler(this.ksBar_ValueChanged);
             // 
@@ -193,9 +199,9 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label2.Location = new System.Drawing.Point(3, 51);
+            this.label2.Location = new System.Drawing.Point(3, 40);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(38, 51);
+            this.label2.Size = new System.Drawing.Size(38, 40);
             this.label2.TabIndex = 2;
             this.label2.Text = "k_d:";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -203,11 +209,11 @@
             // kdBar
             // 
             this.kdBar.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.kdBar.Location = new System.Drawing.Point(47, 53);
+            this.kdBar.Location = new System.Drawing.Point(47, 42);
             this.kdBar.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.kdBar.Maximum = 19;
             this.kdBar.Name = "kdBar";
-            this.kdBar.Size = new System.Drawing.Size(132, 47);
+            this.kdBar.Size = new System.Drawing.Size(132, 36);
             this.kdBar.TabIndex = 3;
             this.kdBar.ValueChanged += new System.EventHandler(this.kdBar_ValueChanged);
             // 
@@ -215,9 +221,9 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label3.Location = new System.Drawing.Point(3, 102);
+            this.label3.Location = new System.Drawing.Point(3, 80);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(38, 51);
+            this.label3.Size = new System.Drawing.Size(38, 40);
             this.label3.TabIndex = 4;
             this.label3.Text = "m:";
             this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -225,11 +231,11 @@
             // mBar
             // 
             this.mBar.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mBar.Location = new System.Drawing.Point(47, 105);
+            this.mBar.Location = new System.Drawing.Point(47, 83);
             this.mBar.Maximum = 100;
             this.mBar.Minimum = 1;
             this.mBar.Name = "mBar";
-            this.mBar.Size = new System.Drawing.Size(132, 45);
+            this.mBar.Size = new System.Drawing.Size(132, 34);
             this.mBar.TabIndex = 5;
             this.mBar.TickStyle = System.Windows.Forms.TickStyle.None;
             this.mBar.Value = 1;
@@ -240,9 +246,9 @@
             this.label4.AutoSize = true;
             this.label4.BackColor = System.Drawing.SystemColors.Control;
             this.label4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label4.Location = new System.Drawing.Point(3, 153);
+            this.label4.Location = new System.Drawing.Point(3, 120);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(38, 51);
+            this.label4.Size = new System.Drawing.Size(38, 40);
             this.label4.TabIndex = 6;
             this.label4.Text = "z:";
             this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -250,11 +256,11 @@
             // zBar
             // 
             this.zBar.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.zBar.Location = new System.Drawing.Point(47, 156);
+            this.zBar.Location = new System.Drawing.Point(47, 123);
             this.zBar.Maximum = 100;
             this.zBar.Minimum = 11;
             this.zBar.Name = "zBar";
-            this.zBar.Size = new System.Drawing.Size(132, 45);
+            this.zBar.Size = new System.Drawing.Size(132, 34);
             this.zBar.TabIndex = 7;
             this.zBar.TickStyle = System.Windows.Forms.TickStyle.None;
             this.zBar.Value = 20;
@@ -263,10 +269,10 @@
             // objectPicture
             // 
             this.objectPicture.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.objectPicture.Location = new System.Drawing.Point(5, 209);
+            this.objectPicture.Location = new System.Drawing.Point(5, 165);
             this.objectPicture.Margin = new System.Windows.Forms.Padding(5);
             this.objectPicture.Name = "objectPicture";
-            this.objectPicture.Size = new System.Drawing.Size(34, 41);
+            this.objectPicture.Size = new System.Drawing.Size(34, 30);
             this.objectPicture.TabIndex = 8;
             this.objectPicture.TabStop = false;
             this.objectPicture.SizeChanged += new System.EventHandler(this.objectPicture_SizeChanged);
@@ -274,9 +280,9 @@
             // objectColorButton
             // 
             this.objectColorButton.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.objectColorButton.Location = new System.Drawing.Point(47, 207);
+            this.objectColorButton.Location = new System.Drawing.Point(47, 163);
             this.objectColorButton.Name = "objectColorButton";
-            this.objectColorButton.Size = new System.Drawing.Size(132, 45);
+            this.objectColorButton.Size = new System.Drawing.Size(132, 34);
             this.objectColorButton.TabIndex = 9;
             this.objectColorButton.Text = "Object color";
             this.objectColorButton.UseVisualStyleBackColor = true;
@@ -285,10 +291,10 @@
             // lightPicture
             // 
             this.lightPicture.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lightPicture.Location = new System.Drawing.Point(5, 260);
+            this.lightPicture.Location = new System.Drawing.Point(5, 205);
             this.lightPicture.Margin = new System.Windows.Forms.Padding(5);
             this.lightPicture.Name = "lightPicture";
-            this.lightPicture.Size = new System.Drawing.Size(34, 45);
+            this.lightPicture.Size = new System.Drawing.Size(34, 30);
             this.lightPicture.TabIndex = 10;
             this.lightPicture.TabStop = false;
             this.lightPicture.SizeChanged += new System.EventHandler(this.lightPicture_SizeChanged);
@@ -296,13 +302,47 @@
             // lightColorButton
             // 
             this.lightColorButton.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lightColorButton.Location = new System.Drawing.Point(47, 258);
+            this.lightColorButton.Location = new System.Drawing.Point(47, 203);
             this.lightColorButton.Name = "lightColorButton";
-            this.lightColorButton.Size = new System.Drawing.Size(132, 49);
+            this.lightColorButton.Size = new System.Drawing.Size(132, 34);
             this.lightColorButton.TabIndex = 11;
             this.lightColorButton.Text = "Light color";
             this.lightColorButton.UseVisualStyleBackColor = true;
             this.lightColorButton.Click += new System.EventHandler(this.lightColorButton_Click);
+            // 
+            // interpolateBox
+            // 
+            this.interpolateBox.Controls.Add(this.radioButton2);
+            this.interpolateBox.Controls.Add(this.interpolateColorRadio);
+            this.interpolateBox.Location = new System.Drawing.Point(3, 299);
+            this.interpolateBox.Name = "interpolateBox";
+            this.interpolateBox.Size = new System.Drawing.Size(182, 47);
+            this.interpolateBox.TabIndex = 2;
+            this.interpolateBox.TabStop = false;
+            this.interpolateBox.Text = "Interpolate";
+            // 
+            // radioButton2
+            // 
+            this.radioButton2.AutoSize = true;
+            this.radioButton2.Location = new System.Drawing.Point(85, 22);
+            this.radioButton2.Name = "radioButton2";
+            this.radioButton2.Size = new System.Drawing.Size(63, 19);
+            this.radioButton2.TabIndex = 1;
+            this.radioButton2.Text = "Vectors";
+            this.radioButton2.UseVisualStyleBackColor = true;
+            // 
+            // interpolateColorRadio
+            // 
+            this.interpolateColorRadio.AutoSize = true;
+            this.interpolateColorRadio.Checked = true;
+            this.interpolateColorRadio.Location = new System.Drawing.Point(6, 22);
+            this.interpolateColorRadio.Name = "interpolateColorRadio";
+            this.interpolateColorRadio.Size = new System.Drawing.Size(59, 19);
+            this.interpolateColorRadio.TabIndex = 0;
+            this.interpolateColorRadio.TabStop = true;
+            this.interpolateColorRadio.Text = "Colors";
+            this.interpolateColorRadio.UseVisualStyleBackColor = true;
+            this.interpolateColorRadio.CheckedChanged += new System.EventHandler(this.interpolateColorRadio_CheckedChanged);
             // 
             // Form1
             // 
@@ -326,6 +366,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.zBar)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.objectPicture)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.lightPicture)).EndInit();
+            this.interpolateBox.ResumeLayout(false);
+            this.interpolateBox.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -351,5 +393,8 @@
         private Button objectColorButton;
         private PictureBox lightPicture;
         private Button lightColorButton;
+        private GroupBox interpolateBox;
+        private RadioButton radioButton2;
+        private RadioButton interpolateColorRadio;
     }
 }
