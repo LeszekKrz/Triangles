@@ -17,6 +17,7 @@ namespace Triangles
         Color[] colors;
         Point[] points;
 
+        Color color;
         SolidBrush brush;
 
         public Vertex A { get { return a; } }
@@ -64,7 +65,7 @@ namespace Triangles
             return this[v];
         }
 
-        public void PaintTriangle(int size, Graphics g, SimulationParameters simulationParameters, bool interpolateColors)
+        public void PaintTriangle(int size, LockableBitmap bitmap, SimulationParameters simulationParameters, bool interpolateColors)
         {
             List<Vertex> vertices = new List<Vertex>() { a, b, c };
             vertices.Sort();
@@ -82,8 +83,8 @@ namespace Triangles
             while (y != this[indices[2]].ToPoint(size).Y)
             {
                 StepAET(y, indices, size, ref curr, ref k, AET);
-                if (interpolateColors) PaintAETwithInterpolatedColor(AET, y, size, g);
-                else PaintAETwithInterpolatedVectors(AET, y, size, g, simulationParameters);
+                if (interpolateColors) PaintAETwithInterpolatedColor(AET, y, size, bitmap);
+                else PaintAETwithInterpolatedVectors(AET, y, size, bitmap, simulationParameters);
                 y++;
             }
         }
@@ -117,40 +118,41 @@ namespace Triangles
             AET.Sort();
         }
 
-        void PaintAETwithInterpolatedColor(List<ActiveEdge> AET, int y, int size, Graphics g)
+        void PaintAETwithInterpolatedColor(List<ActiveEdge> AET, int y, int size, LockableBitmap bitmap)
         {
             for (int i = 0; i < AET.Count; i += 2)
             {
-                brush.Color = InterpolateColorOnLine(AET[i], new Point((int)AET[i].X, y));
-                g.FillRectangle(brush, (int)Math.Round(AET[i].X), y, 1, 1);
+                color = InterpolateColorOnLine(AET[i], new Point((int)AET[i].X, y));
+                //g.FillRectangle(brush, (int)Math.Round(AET[i].X), y, 1, 1);
+                bitmap.SetPixel((int)Math.Round(AET[i].X), y, color);
                 for (int j = (int)Math.Round(AET[i].X) + 1; j < (int)Math.Round(AET[i + 1].X); j++)
                 {
-                    brush.Color = InterpolateColor(colors[0], colors[1], colors[2], new Point(j, y), size);
-                    g.FillRectangle(brush, j, y, 1, 1);
+                    color = InterpolateColor(colors[0], colors[1], colors[2], new Point(j, y), size);
+                    bitmap.SetPixel(j, y, color);
                 }
-                brush.Color = InterpolateColorOnLine(AET[i + 1], new Point((int)AET[i + 1].X, y));
-                g.FillRectangle(brush, (int)Math.Round(AET[i + 1].X), y, 1, 1);
+                color = InterpolateColorOnLine(AET[i + 1], new Point((int)AET[i + 1].X, y));
+                bitmap.SetPixel((int)Math.Round(AET[i + 1].X), y, color);
                 AET[i].Step();
                 AET[i + 1].Step();
             }
         }
 
-        void PaintAETwithInterpolatedVectors(List<ActiveEdge> AET, int y, int size, Graphics g, SimulationParameters simulationParameters)
+        void PaintAETwithInterpolatedVectors(List<ActiveEdge> AET, int y, int size, LockableBitmap bitmap, SimulationParameters simulationParameters)
         {
             for (int i = 0; i < AET.Count; i += 2)
             {
                 Vertex interpolated = InterpolateVertexOnEdge(new Point((int)AET[i].X, y), AET[i]);
-                brush.Color = CalculateColor(simulationParameters, interpolated);
-                g.FillRectangle(brush, (int)Math.Round(AET[i].X), y, 1, 1);
+                color = CalculateColor(simulationParameters, interpolated);
+                bitmap.SetPixel((int)Math.Round(AET[i].X), y, color);
                 for (int j = (int)Math.Round(AET[i].X) + 1; j < (int)Math.Round(AET[i + 1].X); j++)
                 {
                     interpolated = InterpolateVertexInTriangle(new Point(j, y));
-                    brush.Color = CalculateColor(simulationParameters, interpolated);
-                    g.FillRectangle(brush, j, y, 1, 1);
+                    color = CalculateColor(simulationParameters, interpolated);
+                    bitmap.SetPixel(j, y, color);
                 }
                 interpolated = InterpolateVertexOnEdge(new Point((int)AET[i + 1].X, y), AET[i+1]);
-                brush.Color = CalculateColor(simulationParameters, interpolated);
-                g.FillRectangle(brush, (int)Math.Round(AET[i + 1].X), y, 1, 1);
+                color = CalculateColor(simulationParameters, interpolated);
+                bitmap.SetPixel((int)Math.Round(AET[i + 1].X), y, color);
                 AET[i].Step();
                 AET[i + 1].Step();
             }

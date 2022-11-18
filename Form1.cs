@@ -20,6 +20,7 @@ namespace Triangles
         Pen blackPen;
         Pen redPen;
         bool drawLines = false;
+        LockableBitmap lockable;
 
         Color objectColor;
         Color lightColor;
@@ -59,7 +60,9 @@ namespace Triangles
             timer.Interval = 10;
             timer.Tick += new EventHandler(TimerTick);
 
-            drawArea.Image = new Bitmap(drawArea.Size.Width, drawArea.Size.Height);
+            Bitmap image = new Bitmap(drawArea.Size.Width, drawArea.Size.Height);
+            drawArea.Image = image;
+            lockable = new LockableBitmap(image);
 
             sun = new VertexCoordinates(0, 0, z);
             r = 0;
@@ -87,19 +90,31 @@ namespace Triangles
                     simulationParameters.Sun = sun;
                     if (drawArea.Size.Height < size) size = drawArea.Size.Height;
                     if (drawLines) foreach (Triangle triangle in triangles)
-                    {
-                        g.DrawLine(blackPen, triangle.A.ToPoint(size), triangle.B.ToPoint(size));
-                        g.DrawLine(blackPen, triangle.B.ToPoint(size), triangle.C.ToPoint(size));
-                        g.DrawLine(blackPen, triangle.C.ToPoint(size), triangle.A.ToPoint(size));
-                    }
-                    //drawArea.Refresh();
-                    foreach(Triangle triangle in triangles)
-                    {
-                        triangle.PaintTriangle(size, g, simulationParameters, interpolateColorRadio.Checked);
-                        //drawArea.Refresh();
-                        //System.Threading.Thread.Sleep(20);
-                    }
+                        {
+                            g.DrawLine(blackPen, triangle.A.ToPoint(size), triangle.B.ToPoint(size));
+                            g.DrawLine(blackPen, triangle.B.ToPoint(size), triangle.C.ToPoint(size));
+                            g.DrawLine(blackPen, triangle.C.ToPoint(size), triangle.A.ToPoint(size));
+                        }
                 }
+            }
+            //        //drawArea.Refresh();
+            //        foreach(Triangle triangle in triangles)
+            //        {
+            //            triangle.PaintTriangle(size, g, simulationParameters, interpolateColorRadio.Checked);
+            //            //drawArea.Refresh();
+            //            //System.Threading.Thread.Sleep(20);
+            //        }
+            //    }
+            //}
+            if (triangles != null && triangles.Count > 0)
+            {
+                int size = drawArea.Size.Width - 100;
+                lockable.LockBits();
+                foreach (Triangle triangle in triangles)
+                {
+                    triangle.PaintTriangle(size, lockable, simulationParameters, interpolateColorRadio.Checked);
+                }
+                lockable.UnlockBits();
             }
             drawArea.Refresh();
         }
@@ -172,7 +187,10 @@ namespace Triangles
             {
                 Height += drawArea.Width - drawArea.Height;
             }
-            drawArea.Image = new Bitmap(drawArea.Size.Width, drawArea.Size.Height);
+            Bitmap image = new Bitmap(drawArea.Size.Width, drawArea.Size.Height);
+            drawArea.Image = image;
+            lockable = new LockableBitmap(image);
+            if (animationButton.Text == "Stop animation") timer.Enabled = true;
             Redraw();
         }
 
@@ -289,6 +307,11 @@ namespace Triangles
         private void interpolateColorRadio_CheckedChanged(object sender, EventArgs e)
         {
             Redraw();
+        }
+
+        private void drawArea_SizeChanged(object sender, EventArgs e)
+        {
+            timer.Enabled = false;
         }
     }
 }

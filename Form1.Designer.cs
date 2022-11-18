@@ -87,6 +87,7 @@
             this.drawArea.Size = new System.Drawing.Size(395, 395);
             this.drawArea.TabIndex = 0;
             this.drawArea.TabStop = false;
+            this.drawArea.SizeChanged += new System.EventHandler(this.drawArea_SizeChanged);
             // 
             // tableLayoutPanel2
             // 
