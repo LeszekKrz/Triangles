@@ -34,6 +34,8 @@ namespace Triangles
         double step;
         int increasing;
 
+        Image texture;
+
 
         VertexCoordinates sun;
         
@@ -68,7 +70,7 @@ namespace Triangles
             r = 0;
             step = Math.PI / 8;
             angle = 0;
-            simulationParameters = new SimulationParameters(kd, ks, lightColor, objectColor, m);
+            simulationParameters = new SimulationParametersWithColor(kd, ks, lightColor, m, objectColor);
             increasing = 1;
 
             RefreshObjectPicture();
@@ -79,7 +81,22 @@ namespace Triangles
 
         public void Redraw()
         {
-            simulationParameters = new SimulationParameters(kd, ks, lightColor, objectColor, m);
+            if (textureRadio.Checked)
+            {
+                LockableBitmap textureBitmap = new LockableBitmap(new Bitmap(texture, drawArea.Width, drawArea.Height));
+                textureBitmap.LockBits();
+                simulationParameters = new SimulationParametersWithTexture(kd, ks, lightColor, m, textureBitmap);
+            }
+            else
+            {
+                simulationParameters = new SimulationParametersWithColor(kd, ks, lightColor, m, objectColor);
+                if (modifyCheck.Checked)
+                {
+                    LockableBitmap textureBitmap = new LockableBitmap(new Bitmap(texture, drawArea.Width, drawArea.Height));
+                    textureBitmap.LockBits();
+                    simulationParameters = new SimulationParametersWithBoth(simulationParameters as SimulationParametersWithColor, textureBitmap);
+                }
+            }
             //drawArea.Image = new Bitmap(drawArea.Size.Width, drawArea.Size.Height);
             using (Graphics g = Graphics.FromImage(drawArea.Image))
             {
@@ -112,7 +129,7 @@ namespace Triangles
                 lockable.LockBits();
                 foreach (Triangle triangle in triangles)
                 {
-                    triangle.PaintTriangle(size, lockable, simulationParameters, interpolateColorRadio.Checked);
+                    triangle.PaintTriangle(size, lockable, simulationParameters, interpolateColorRadio.Checked, modifyCheck.Checked);
                 }
                 lockable.UnlockBits();
             }
@@ -170,7 +187,7 @@ namespace Triangles
                             triangles.Add(new Triangle(tempVertices));
                         }
                     }
-                    Debug.WriteLine("End of file");
+                    //Debug.WriteLine("End of file");
                     Redraw();
                 }
             }
@@ -312,6 +329,27 @@ namespace Triangles
         private void drawArea_SizeChanged(object sender, EventArgs e)
         {
             timer.Enabled = false;
+        }
+
+        private void textureRadio_CheckedChanged(object sender, EventArgs e)
+        {
+            Redraw();
+        }
+
+        private void textureButton_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "PNG files (*.png)|*.png";
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                texture = Image.FromFile(openFileDialog.FileName);
+            }
+            Redraw();
+        }
+
+        private void modifyCheck_CheckedChanged(object sender, EventArgs e)
+        {
+            Redraw();
         }
     }
 }

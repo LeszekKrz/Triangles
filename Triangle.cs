@@ -10,6 +10,7 @@ namespace Triangles
 {
     internal class Triangle
     {
+        public static NormalVector oo1 = new NormalVector(0, 0, 1);
         Vertex a;
         Vertex b;
         Vertex c;
@@ -65,7 +66,7 @@ namespace Triangles
             return this[v];
         }
 
-        public void PaintTriangle(int size, LockableBitmap bitmap, SimulationParameters simulationParameters, bool interpolateColors)
+        public void PaintTriangle(int size, LockableBitmap bitmap, SimulationParameters simulationParameters, bool interpolateColors, bool modify)
         {
             List<Vertex> vertices = new List<Vertex>() { a, b, c };
             vertices.Sort();
@@ -74,7 +75,9 @@ namespace Triangles
             List<ActiveEdge> AET;
             int y = this[indices[0]].ToPoint(size).Y;
 
-            colors = new Color[3] { CalculateColor(simulationParameters, this[0]), CalculateColor(simulationParameters, this[1]), CalculateColor(simulationParameters, this[2]) };
+            colors = new Color[3] { CalculateColor(simulationParameters, this[0], this[0].ToPoint(size), modify),
+                CalculateColor(simulationParameters, this[1], this[1].ToPoint(size), modify),
+                CalculateColor(simulationParameters, this[2], this[2].ToPoint(size), modify) };
             points = new Point[3] { a.ToPoint(size), b.ToPoint(size), c.ToPoint(size) };
             AET = new List<ActiveEdge>();
             int k = 0;
@@ -83,8 +86,8 @@ namespace Triangles
             while (y != this[indices[2]].ToPoint(size).Y)
             {
                 StepAET(y, indices, size, ref curr, ref k, AET);
-                if (interpolateColors) PaintAETwithInterpolatedColor(AET, y, size, bitmap);
-                else PaintAETwithInterpolatedVectors(AET, y, size, bitmap, simulationParameters);
+                if (interpolateColors) PaintAETwithInterpolatedColor(AET, y, size, bitmap, modify);
+                else PaintAETwithInterpolatedVectors(AET, y, size, bitmap, simulationParameters, modify);
                 y++;
             }
         }
@@ -118,7 +121,7 @@ namespace Triangles
             AET.Sort();
         }
 
-        void PaintAETwithInterpolatedColor(List<ActiveEdge> AET, int y, int size, LockableBitmap bitmap)
+        void PaintAETwithInterpolatedColor(List<ActiveEdge> AET, int y, int size, LockableBitmap bitmap, bool modify)
         {
             for (int i = 0; i < AET.Count; i += 2)
             {
@@ -137,21 +140,21 @@ namespace Triangles
             }
         }
 
-        void PaintAETwithInterpolatedVectors(List<ActiveEdge> AET, int y, int size, LockableBitmap bitmap, SimulationParameters simulationParameters)
+        void PaintAETwithInterpolatedVectors(List<ActiveEdge> AET, int y, int size, LockableBitmap bitmap, SimulationParameters simulationParameters, bool modify)
         {
             for (int i = 0; i < AET.Count; i += 2)
             {
                 Vertex interpolated = InterpolateVertexOnEdge(new Point((int)AET[i].X, y), AET[i]);
-                color = CalculateColor(simulationParameters, interpolated);
+                color = CalculateColor(simulationParameters, interpolated, new Point((int)AET[i].X, y), modify);
                 bitmap.SetPixel((int)Math.Round(AET[i].X), y, color);
                 for (int j = (int)Math.Round(AET[i].X) + 1; j < (int)Math.Round(AET[i + 1].X); j++)
                 {
                     interpolated = InterpolateVertexInTriangle(new Point(j, y));
-                    color = CalculateColor(simulationParameters, interpolated);
+                    color = CalculateColor(simulationParameters, interpolated, new Point(j,y), modify);
                     bitmap.SetPixel(j, y, color);
                 }
                 interpolated = InterpolateVertexOnEdge(new Point((int)AET[i + 1].X, y), AET[i+1]);
-                color = CalculateColor(simulationParameters, interpolated);
+                color = CalculateColor(simulationParameters, interpolated, new Point((int)AET[i+1].X, y), modify);
                 bitmap.SetPixel((int)Math.Round(AET[i + 1].X), y, color);
                 AET[i].Step();
                 AET[i + 1].Step();
@@ -189,22 +192,27 @@ namespace Triangles
             
         }
 
-        Color CalculateColor(SimulationParameters simulationParameters, Vertex v)
+        Color CalculateColor(SimulationParameters simulationParameters, Vertex v, Point p, bool modify)
         {
             NormalVector L = (simulationParameters.Sun - v.Coordinates).GetVersor();
             NormalVector N = v.Normal.GetVersor();
+            if (modify)
+            {
+                NormalVector nTexture = (simulationParameters as SimulationParametersWithTexture).GetVector(p.X, p.Y);
+                N = N.Modify(nTexture);
+            }
             NormalVector R = (2 * N.Product(L) * N - L);
 
             double lL, lO;
             lL = (double)simulationParameters.LightColor.R / 255;
-            lO = (double)simulationParameters.ObjectColor.R / 255;
+            lO = (double)simulationParameters.GetColor(p.X, p.Y).R / 255;
             double l = simulationParameters.Kd * lL * lO * N.Cosinus(L) + simulationParameters.Ks * lL * lO * Math.Pow(simulationParameters.V.Cosinus(R), simulationParameters.M);
             
             if (l > 1) l = 1;
             byte r = (byte)(l * 255);
 
             lL = (double)simulationParameters.LightColor.G / 255;
-            lO = (double)simulationParameters.ObjectColor.G / 255;
+            lO = (double)simulationParameters.GetColor(p.X, p.Y).G / 255;
             l = simulationParameters.Kd * lL * lO * N.Cosinus(L) + simulationParameters.Ks * lL * lO * Math.Pow(simulationParameters.V.Cosinus(R), simulationParameters.M);
 
             if (l > 1) l = 1;
@@ -212,7 +220,7 @@ namespace Triangles
 
 
             lL = (double)simulationParameters.LightColor.B / 255;
-            lO = (double)simulationParameters.ObjectColor.B / 255;
+            lO = (double)simulationParameters.GetColor(p.X, p.Y).B / 255;
             l = simulationParameters.Kd * lL * lO * N.Cosinus(L) + simulationParameters.Ks * lL * lO * Math.Pow(simulationParameters.V.Cosinus(R), simulationParameters.M);
 
             if (l > 1) l = 1;

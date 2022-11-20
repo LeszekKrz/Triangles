@@ -89,6 +89,11 @@ namespace Triangles
             return vU.xn * vV.xn + vU.yn * vV.yn + vU.zn * vV.zn;
         }
 
+        public NormalVector VectorProduct(NormalVector nV)
+        {
+            return new NormalVector(this.yn * nV.zn - this.zn * nV.yn, this.zn * nV.xn - this.xn * nV.zn, this.xn * nV.yn - this.yn * nV.xn);
+        }
+
         public double Cosinus(NormalVector nV)
         {
             double product = this.Product(nV);
@@ -104,5 +109,17 @@ namespace Triangles
         {
             return new NormalVector(u.xn - v.xn, u.yn - v.yn, u.zn - v.zn);
         }
+
+        
+
+        public NormalVector Modify(NormalVector nTexture)
+        {
+            NormalVector B = this.VectorProduct(Triangle.oo1).GetVersor();
+            if (xn == 0 && yn == 0 && zn == 1) B = new NormalVector(0, 1, 0);
+            NormalVector T = B.VectorProduct(this).GetVersor();
+            NormalVector[] matrix = new NormalVector[] { T, B, this };
+            return Functions.Multiply(matrix, nTexture);
+        }
+
     }
 }
