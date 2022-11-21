@@ -339,7 +339,7 @@ namespace Triangles
         private void textureButton_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "PNG files (*.png)|*.png";
+            openFileDialog.Filter = "Image files (*.png, *.jpg)|*.png;*.jpg";
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 texture = Image.FromFile(openFileDialog.FileName);
