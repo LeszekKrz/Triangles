@@ -50,7 +50,6 @@ namespace Triangles
             triangles = new List<Triangle>();
             blackPen = new Pen(Color.Black);
             redPen = new Pen(Color.Red);
-            //objectColor = Color.Green;
             objectColor = Color.Orange;
             lightColor = Color.White;
             kd = 0;
@@ -97,7 +96,6 @@ namespace Triangles
                     simulationParameters = new SimulationParametersWithBoth(simulationParameters as SimulationParametersWithColor, textureBitmap);
                 }
             }
-            //drawArea.Image = new Bitmap(drawArea.Size.Width, drawArea.Size.Height);
             using (Graphics g = Graphics.FromImage(drawArea.Image))
             {
                 g.Clear(Color.White);
@@ -114,15 +112,6 @@ namespace Triangles
                         }
                 }
             }
-            //        //drawArea.Refresh();
-            //        foreach(Triangle triangle in triangles)
-            //        {
-            //            triangle.PaintTriangle(size, g, simulationParameters, interpolateColorRadio.Checked);
-            //            //drawArea.Refresh();
-            //            //System.Threading.Thread.Sleep(20);
-            //        }
-            //    }
-            //}
             if (triangles != null && triangles.Count > 0)
             {
                 int size = drawArea.Size.Width - 100;
@@ -187,7 +176,6 @@ namespace Triangles
                             triangles.Add(new Triangle(tempVertices));
                         }
                     }
-                    //Debug.WriteLine("End of file");
                     Redraw();
                 }
             }

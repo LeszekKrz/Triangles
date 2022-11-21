@@ -126,7 +126,6 @@ namespace Triangles
             for (int i = 0; i < AET.Count; i += 2)
             {
                 color = InterpolateColorOnLine(AET[i], new Point((int)AET[i].X, y));
-                //g.FillRectangle(brush, (int)Math.Round(AET[i].X), y, 1, 1);
                 bitmap.SetPixel((int)Math.Round(AET[i].X), y, color);
                 for (int j = (int)Math.Round(AET[i].X) + 1; j < (int)Math.Round(AET[i + 1].X); j++)
                 {
