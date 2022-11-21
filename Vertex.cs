@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Triangles
 {
-    public class Vertex : IComparable<Vertex>
+    public class Vertex // klasa wierzcholek przechowywujaca wirtualne wspolrzedne i wektory wlasne i pozwalajaca skalowac je na wspolrzedne ekranowe
     {
         VertexCoordinates coordinates;
         NormalVector vector;
@@ -22,20 +22,14 @@ namespace Triangles
             this.vector = vector;
         }
 
-        public Point ToPoint(int size)
+        public Point ToPoint(int size) // skalowanie do wspolrzednych ekranowych dla okna rozmiaru size
         {
             int range = size / 2;
             return new Point((int)(50 + coordinates.X * range + range), (int)(50 + coordinates.Y * range + range));
         }
-
-        public int CompareTo(Vertex? other)
-        {
-            if (Coordinates.Y.CompareTo(other.Coordinates.Y) == 0) return Coordinates.X.CompareTo(other.Coordinates.X);
-            return coordinates.Y.CompareTo(other.Coordinates.Y);
-        }
     }
 
-    public class VertexCoordinates
+    public class VertexCoordinates // wspolrzedne wirtualne wierzcholka, roznica wspolrzednych to wektor miedzy punktami
     {
         double x;
         double y;
@@ -59,7 +53,7 @@ namespace Triangles
           
     }
 
-    public class NormalVector
+    public class NormalVector // wektor normalny
     {
         double xn;
         double yn;
@@ -76,12 +70,12 @@ namespace Triangles
             this.zn = zn;
         }
         
-        public NormalVector GetVersor()
+        public NormalVector GetVersor() // skalowanie dlugosci do 1
         {
             return new NormalVector(xn / Length, yn / Length, zn / Length);
         }
 
-        public double Product(NormalVector nV)
+        public double Product(NormalVector nV) // iloczyn skalarny z drugim wektorem
         {
             NormalVector vU = this.GetVersor();
             NormalVector vV = nV.GetVersor();
@@ -89,7 +83,7 @@ namespace Triangles
             return vU.xn * vV.xn + vU.yn * vV.yn + vU.zn * vV.zn;
         }
 
-        public NormalVector VectorProduct(NormalVector nV)
+        public NormalVector VectorProduct(NormalVector nV) // ilcozyn wektorowy z drugim wektorem
         {
             return new NormalVector(this.yn * nV.zn - this.zn * nV.yn, this.zn * nV.xn - this.xn * nV.zn, this.xn * nV.yn - this.yn * nV.xn);
         }
@@ -100,7 +94,7 @@ namespace Triangles
             return product < 0 ? 0 : product;
         }
 
-        public static NormalVector operator*(double d, NormalVector v)
+        public static NormalVector operator*(double d, NormalVector v) // mnozenie przez skalar
         {
             return new NormalVector(v.xn * d, v.yn * d, v.zn * d);
         }
@@ -112,7 +106,7 @@ namespace Triangles
 
         
 
-        public NormalVector Modify(NormalVector nTexture)
+        public NormalVector Modify(NormalVector nTexture) // modyfikacja na podstawie mapy wektorow normalnych
         {
             NormalVector B = this.VectorProduct(Triangle.oo1).GetVersor();
             if (xn == 0 && yn == 0 && zn == 1) B = new NormalVector(0, 1, 0);

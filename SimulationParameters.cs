@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace Triangles
 {
+    // drzewo dziedziczenia klas przekazujacych parametry symulacji, kolor obiektu, teksture i/lub mape wektorow noemalnych
+    // wszystkie klasy posiadaja metode GetColor(), a klasy z mapa wektorow rowniez GetVector(), przez co trojkat w wiekszosci przypadkow nie musi wiedziec ktora z sytuacji zachodzi
     internal abstract class SimulationParameters
     {
         double kd;
@@ -57,6 +59,8 @@ namespace Triangles
     {
         LockableBitmap texture;
 
+        public LockableBitmap Texture { get => texture; }
+
         public SimulationParametersWithTexture(double kd, double ks, Color lightColor, int m, LockableBitmap texture) : base(kd, ks, lightColor, m)
         {
             this.texture = texture;
@@ -66,10 +70,23 @@ namespace Triangles
         {
             return texture.GetPixel(i, j);
         }
+    }
+
+    internal abstract class SimulationParametersWithNormal : SimulationParameters
+    {
+        LockableBitmap normalMap;
+
+        public SimulationParametersWithNormal(double kd, double ks, Color lightColor, int m, LockableBitmap normalMap) : base(kd, ks, lightColor, m)
+        {
+            this.normalMap = normalMap;
+        }
+
+        public abstract override Color GetColor(int i, int j);
+
 
         public NormalVector GetVector(int i, int j)
         {
-            Color color = texture.GetPixel(i, j);
+            Color color = normalMap.GetPixel(i, j);
             double nx = (double)(color.R - 127) / 128;
             double ny = (double)(color.G - 127) / 128;
             double nz = (double)(color.B - 127) / 128;
@@ -77,16 +94,16 @@ namespace Triangles
         }
     }
 
-    internal class SimulationParametersWithBoth : SimulationParametersWithTexture
+    internal class SimulationParametersWithColorAndNormal : SimulationParametersWithNormal
     {
         Color objectColor;
 
-        public SimulationParametersWithBoth(double kd, double ks, Color lightColor, int m, LockableBitmap texture, Color objectColor) : base(kd, ks, lightColor, m, texture)
+        public SimulationParametersWithColorAndNormal(double kd, double ks, Color lightColor, int m, LockableBitmap normalMap, Color objectColor) : base(kd, ks, lightColor, m, normalMap)
         {
             this.objectColor = objectColor;
         }
 
-        public SimulationParametersWithBoth(SimulationParametersWithColor sp, LockableBitmap texture): base(sp.Kd, sp.Ks, sp.LightColor, sp.M, texture)
+        public SimulationParametersWithColorAndNormal(SimulationParametersWithColor sp, LockableBitmap normalMap): base(sp.Kd, sp.Ks, sp.LightColor, sp.M, normalMap)
         {
             this.objectColor = sp.ObjectColor;
         }
@@ -94,6 +111,26 @@ namespace Triangles
         public override Color GetColor(int i, int j)
         {
             return objectColor;
+        }
+    }
+
+    internal class SimulationParametersWithTextureAndNormal : SimulationParametersWithNormal
+    {
+        LockableBitmap texture;
+
+        public SimulationParametersWithTextureAndNormal(double kd, double ks, Color lightColor, int m, LockableBitmap normalMap, LockableBitmap texture) : base(kd, ks, lightColor, m, normalMap)
+        {
+            this.texture = texture;
+        }
+
+        public SimulationParametersWithTextureAndNormal(SimulationParametersWithTexture sp, LockableBitmap normalMap) : base(sp.Kd, sp.Ks, sp.LightColor, sp.M, normalMap)
+        {
+            this.texture = sp.Texture;
+        }
+
+        public override Color GetColor(int i, int j)
+        {
+            return texture.GetPixel(i, j);
         }
     }
 }

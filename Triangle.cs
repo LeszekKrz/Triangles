@@ -10,7 +10,7 @@ namespace Triangles
 {
     internal class Triangle
     {
-        public static NormalVector oo1 = new NormalVector(0, 0, 1);
+        public static NormalVector oo1 = new NormalVector(0, 0, 1); // wektor do obliczen przy modyfikacji wektorow normalnych
         Vertex a;
         Vertex b;
         Vertex c;
@@ -38,7 +38,7 @@ namespace Triangles
         }
 
 
-        public Vertex this[int i]
+        public Vertex this[int i] // odwolywanie sie do wierzcholkow po indeksie
         {
             get {
                 switch (i%3)
@@ -51,7 +51,7 @@ namespace Triangles
             }
         }
 
-        public int this[Vertex v]
+        public int this[Vertex v] // zwracanie indeksu wierzcholka
         {
             get
             {
@@ -66,8 +66,9 @@ namespace Triangles
             return this[v];
         }
 
-        public void PaintTriangle(int size, LockableBitmap bitmap, SimulationParameters simulationParameters, bool interpolateColors, bool modify)
+        public void PaintTriangle(int size, LockableBitmap bitmap, SimulationParameters simulationParameters, bool interpolateColors, bool modify) // glowna funkcja malujaca trojkat
         {
+            // inicjalizacja zmiennych i przygotowanie listy wierzcholkow do algorytmy AET z sortowaniem wierzcholkow
             List<Vertex> vertices = new List<Vertex>() { a, b, c };
             vertices.Sort();
             int[] indices = vertices.Select(v => this[v]).ToArray();
@@ -77,15 +78,15 @@ namespace Triangles
 
             colors = new Color[3] { CalculateColor(simulationParameters, this[0], this[0].ToPoint(size), modify),
                 CalculateColor(simulationParameters, this[1], this[1].ToPoint(size), modify),
-                CalculateColor(simulationParameters, this[2], this[2].ToPoint(size), modify) };
-            points = new Point[3] { a.ToPoint(size), b.ToPoint(size), c.ToPoint(size) };
+                CalculateColor(simulationParameters, this[2], this[2].ToPoint(size), modify) }; // liczenie kolorow w trzech wierzcholkach trojkata
+            points = new Point[3] { a.ToPoint(size), b.ToPoint(size), c.ToPoint(size) };  // przygototwanie wspolrzednych ekranowych wierzcholkow trojkata
             AET = new List<ActiveEdge>();
             int k = 0;
             Point curr = this[indices[0]].ToPoint(size);
 
             while (y != this[indices[2]].ToPoint(size).Y)
             {
-                StepAET(y, indices, size, ref curr, ref k, AET);
+                StepAET(y, indices, size, ref curr, ref k, AET); // aktualizacja AET dla nowego y
                 if (interpolateColors) PaintAETwithInterpolatedColor(AET, y, size, bitmap, modify);
                 else PaintAETwithInterpolatedVectors(AET, y, size, bitmap, simulationParameters, modify);
                 y++;
@@ -121,11 +122,13 @@ namespace Triangles
             AET.Sort();
         }
 
-        void PaintAETwithInterpolatedColor(List<ActiveEdge> AET, int y, int size, LockableBitmap bitmap, bool modify)
+        void PaintAETwithInterpolatedColor(List<ActiveEdge> AET, int y, int size, LockableBitmap bitmap, bool modify) // interpolacja koloru na podstawie kolorow w wierzcholkach
         {
             for (int i = 0; i < AET.Count; i += 2)
             {
-                color = InterpolateColorOnLine(AET[i], new Point((int)AET[i].X, y));
+                // z powodu zaookraglen do liczb calkowitych czasem punkty moglyby wyjsc poza trojkatem
+                // wiec lepiej punkty graniczne interpolowac tylko wzgledem dwoch najblizyszych wierzcholkow
+                color = InterpolateColorOnLine(AET[i], new Point((int)AET[i].X, y)); 
                 bitmap.SetPixel((int)Math.Round(AET[i].X), y, color);
                 for (int j = (int)Math.Round(AET[i].X) + 1; j < (int)Math.Round(AET[i + 1].X); j++)
                 {
@@ -139,7 +142,7 @@ namespace Triangles
             }
         }
 
-        void PaintAETwithInterpolatedVectors(List<ActiveEdge> AET, int y, int size, LockableBitmap bitmap, SimulationParameters simulationParameters, bool modify)
+        void PaintAETwithInterpolatedVectors(List<ActiveEdge> AET, int y, int size, LockableBitmap bitmap, SimulationParameters simulationParameters, bool modify) // liczenie koloru na podstawie interpolowanych wsporzedncyh i wektorow
         {
             for (int i = 0; i < AET.Count; i += 2)
             {
@@ -160,7 +163,7 @@ namespace Triangles
             }
         }
 
-        Vertex InterpolateVertexOnEdge(Point v, ActiveEdge edge)
+        Vertex InterpolateVertexOnEdge(Point v, ActiveEdge edge) // interpolacja wspolrzednych i wektorow wzgledem dwoch wierzcholkow
         {
             Vertex beginning = this[edge.I];
             Vertex end = this[edge.J];
@@ -176,7 +179,7 @@ namespace Triangles
             return new Vertex(coordinates, vector);
         }
 
-        Vertex InterpolateVertexInTriangle(Point v)
+        Vertex InterpolateVertexInTriangle(Point v) // interpolacja wspolrzednych i wierzcholkow wzgledem calego trojkata
         {
             TriangleRatios ratios = new TriangleRatios(points[0], points[1], points[2], v);
             double x = ratios.Interpolate(a.Coordinates.X, b.Coordinates.X, c.Coordinates.X);
@@ -191,13 +194,13 @@ namespace Triangles
             
         }
 
-        Color CalculateColor(SimulationParameters simulationParameters, Vertex v, Point p, bool modify)
+        Color CalculateColor(SimulationParameters simulationParameters, Vertex v, Point p, bool modify) // funkcja implementujaca rownianie koloru
         {
             NormalVector L = (simulationParameters.Sun - v.Coordinates).GetVersor();
             NormalVector N = v.Normal.GetVersor();
-            if (modify)
+            if (modify) // modyfikacja wektorow normalnych
             {
-                NormalVector nTexture = (simulationParameters as SimulationParametersWithTexture).GetVector(p.X, p.Y);
+                NormalVector nTexture = (simulationParameters as SimulationParametersWithNormal).GetVector(p.X, p.Y);
                 N = N.Modify(nTexture);
             }
             NormalVector R = (2 * N.Product(L) * N - L);
@@ -208,7 +211,7 @@ namespace Triangles
             double l = simulationParameters.Kd * lL * lO * N.Cosinus(L) + simulationParameters.Ks * lL * lO * Math.Pow(simulationParameters.V.Cosinus(R), simulationParameters.M);
             
             if (l > 1) l = 1;
-            byte r = (byte)(l * 255);
+            byte r = (byte)(l * 255); // przycinanie do 255
 
             lL = (double)simulationParameters.LightColor.G / 255;
             lO = (double)simulationParameters.GetColor(p.X, p.Y).G / 255;
@@ -229,7 +232,7 @@ namespace Triangles
 
         }
 
-        Color InterpolateColor(Color cA, Color cB, Color cC, Point v, int size)
+        Color InterpolateColor(Color cA, Color cB, Color cC, Point v, int size) // interpolacja koloru wzgledem calego trojkata
         {
             TriangleRatios ratios = new TriangleRatios(this.a.ToPoint(size), this.b.ToPoint(size), this.c.ToPoint(size), v);
 
@@ -241,7 +244,7 @@ namespace Triangles
 
         }
 
-        Color InterpolateColorOnLine(ActiveEdge edge, Point v)
+        Color InterpolateColorOnLine(ActiveEdge edge, Point v) // interpolacja koloru wzgledem dwoch najblizszych wierzcholkow
         {
 
             Color cA = colors[edge.I];
@@ -262,7 +265,7 @@ namespace Triangles
 
 
         }
-        static public double Area(Point a, Point b, Point c)
+        static public double Area(Point a, Point b, Point c) // pole trojkata, wzor Herona
         {
             double lA = Distance(a, b);
             double lB = Distance(b, c);
@@ -272,12 +275,12 @@ namespace Triangles
             return Math.Sqrt(p * (p - lA) * (p - lB) * (p - lC));
         }
 
-        public static double Distance(Point a, Point b)
+        public static double Distance(Point a, Point b) // odleglosc miedzy punktami
         {
             return Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
         }
 
-        static double Angle(Point u, Point v)
+        static double Angle(Point u, Point v) // nachylenie prostej laczacej punkty
         {
             if (u.Y != v.Y) return (v.X - u.X) / (double)(v.Y - u.Y);
             else return 0;
@@ -285,11 +288,13 @@ namespace Triangles
         }
     }
 
-    public class ActiveEdge : IComparable<ActiveEdge>
+    public class ActiveEdge : IComparable<ActiveEdge> // Klasa aktywnej krawedzi
     {
         double x;
         double m;
 
+
+        //indeksy wierzcholkow na konach krawedzi
         int i;
         int j;
 
@@ -307,23 +312,23 @@ namespace Triangles
             this.m = m;
         }
 
-        public ActiveEdge(int i, int j): this(i,j,0,0)
+        public ActiveEdge(int i, int j): this(i,j,0,0) // pusty kontruktor do usuwania przez porownywanie z obiektem AET w ktorym wazne jest tylko i,j
         {
         }
 
-        public int CompareTo(ActiveEdge? other)
+        public int CompareTo(ActiveEdge? other) // domyslne sortowanie po x
         {
             if (other != null) return x.CompareTo(other.x);
             else return 1;
         }
 
-        public override bool Equals(object? obj)
+        public override bool Equals(object? obj) // porownywanie na podstawie tylko wierzcholkow na krawedziach (jezeli sa takie same to krawedz musi byc taka sama)
         {
             return obj is ActiveEdge edge &&
                    i == edge.i && j == edge.j;
         }
 
-        public void Step()
+        public void Step() // zwiekszenie x
         {
             x += m;
         }
@@ -334,7 +339,7 @@ namespace Triangles
         }
     }
 
-    public class TriangleRatios
+    public class TriangleRatios // klasa pozwalajaca interpolowac wiele zmiennych, liczac stosunek pol jedynie raz, w momencie inicjalizacji
     {
         double ratioA;
         double ratioB;
@@ -354,7 +359,7 @@ namespace Triangles
         }
     }
 
-    public class EdgeRatios
+    public class EdgeRatios // klasa pozwalajaca interpolowac wiele zmiennych, liczac stosunek odleglosci jedynie raz, w momencie inicjalizacji
     {
         double ratioA;
         double ratioB;

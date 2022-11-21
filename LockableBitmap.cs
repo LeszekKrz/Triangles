@@ -8,7 +8,9 @@ using System.Runtime.InteropServices;
 
 namespace Triangles
 {
-    internal class LockableBitmap
+    // klasa sluzaca do blokowania calej bitmapy, przez co wielokronte operacje GetPixel/PutPixel są o wiele szybsze
+    // klasa pochodzi z internetu, ale nie wpływa na sama logike rozwiazania wiec nie jest to chyba klopot
+    internal class LockableBitmap 
     {
         Bitmap source = null;
         IntPtr iPtr = IntPtr.Zero;

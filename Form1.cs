@@ -35,6 +35,7 @@ namespace Triangles
         int increasing;
 
         Image texture;
+        Image normalMap;
 
 
         VertexCoordinates sun;
@@ -56,6 +57,9 @@ namespace Triangles
             ks = 0;
             m = 1;
             z = 2;
+
+            string path = System.IO.Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\Jupiter.png"); // domyslna tekstura
+            texture = Image.FromFile(path);
 
             timer = new System.Windows.Forms.Timer();
             timer.Interval = 10;
@@ -80,23 +84,29 @@ namespace Triangles
 
         public void Redraw()
         {
-            if (textureRadio.Checked)
+            if (textureRadio.Checked) // przekazanie odpowiednich parametrow wraz z kolorem, tekstura i/lub mapa normalna w zaleznosci od zaznaczonych opcji
             {
                 LockableBitmap textureBitmap = new LockableBitmap(new Bitmap(texture, drawArea.Width, drawArea.Height));
                 textureBitmap.LockBits();
                 simulationParameters = new SimulationParametersWithTexture(kd, ks, lightColor, m, textureBitmap);
+                if (modifyCheck.Checked == true)
+                {
+                    LockableBitmap normalBitmap = new LockableBitmap(new Bitmap(normalMap, drawArea.Width, drawArea.Height));
+                    normalBitmap.LockBits();
+                    simulationParameters = new SimulationParametersWithTextureAndNormal(simulationParameters as SimulationParametersWithTexture, normalBitmap);
+                }
             }
             else
             {
                 simulationParameters = new SimulationParametersWithColor(kd, ks, lightColor, m, objectColor);
                 if (modifyCheck.Checked)
                 {
-                    LockableBitmap textureBitmap = new LockableBitmap(new Bitmap(texture, drawArea.Width, drawArea.Height));
-                    textureBitmap.LockBits();
-                    simulationParameters = new SimulationParametersWithBoth(simulationParameters as SimulationParametersWithColor, textureBitmap);
+                    LockableBitmap normalBitmap = new LockableBitmap(new Bitmap(normalMap, drawArea.Width, drawArea.Height));
+                    normalBitmap.LockBits();
+                    simulationParameters = new SimulationParametersWithColorAndNormal(simulationParameters as SimulationParametersWithColor, normalBitmap);
                 }
             }
-            using (Graphics g = Graphics.FromImage(drawArea.Image))
+            using (Graphics g = Graphics.FromImage(drawArea.Image)) // w kodzie mozna ustawic drawLines na true aby zobaczyc siatke trojkatow
             {
                 g.Clear(Color.White);
                 int size = drawArea.Size.Width - 100;
@@ -112,9 +122,9 @@ namespace Triangles
                         }
                 }
             }
-            if (triangles != null && triangles.Count > 0)
+            if (triangles != null && triangles.Count > 0) // rysowanie samych trojkatow
             {
-                int size = drawArea.Size.Width - 100;
+                int size = drawArea.Size.Width - 100; // rozmiar okna przekazywany do skalowania wspolrzednych wirtualnych na ekranowe
                 lockable.LockBits();
                 foreach (Triangle triangle in triangles)
                 {
@@ -125,7 +135,7 @@ namespace Triangles
             drawArea.Refresh();
         }
 
-        void GetTrianglesFromFile()
+        void GetTrianglesFromFile() // wybor i parsowanie pliku .obj na siatke trojkatow
         {
             Stream openStream;
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -186,7 +196,7 @@ namespace Triangles
             GetTrianglesFromFile();
         }
 
-        private void Form1_ResizeEnd(object sender, EventArgs e)
+        private void Form1_ResizeEnd(object sender, EventArgs e) // pilnowanie kwadratowej przestrzeni rysowania
         {
             if (drawArea.Width != drawArea.Height)
             {
@@ -195,11 +205,11 @@ namespace Triangles
             Bitmap image = new Bitmap(drawArea.Size.Width, drawArea.Size.Height);
             drawArea.Image = image;
             lockable = new LockableBitmap(image);
-            if (animationButton.Text == "Stop animation") timer.Enabled = true;
+            if (animationButton.Text == "Stop animation") timer.Enabled = true; // wnowienie animacji zatrzymanej na czas zmiany rozmiaru
             Redraw();
         }
 
-        private void animationButton_Click(object sender, EventArgs e)
+        private void animationButton_Click(object sender, EventArgs e) // wlaczanie i wylaczanie timera
         {
             if (timer.Enabled == true)
             {
@@ -213,7 +223,7 @@ namespace Triangles
             }
         }
 
-        private void TimerTick(object? sender, EventArgs e)
+        private void TimerTick(object? sender, EventArgs e) // zmiana polozenia zrodla swiatla, spirala ze zmiennym r i katem rosnacym o step co tick timera
         {
             r += increasing * 0.1;
             if (r >= 3)
@@ -231,6 +241,8 @@ namespace Triangles
             sun = new VertexCoordinates(Math.Cos(angle) * r, Math.Sin(angle) * r, z);
             Redraw();
         }
+
+        // funkcje odpowiadajace za zmiane parametrow
 
         private void ksBar_ValueChanged(object sender, EventArgs e)
         {
@@ -257,14 +269,27 @@ namespace Triangles
             Redraw();
         }
 
-        private void objectColorButton_Click(object sender, EventArgs e)
+        private void objectColorButton_Click(object sender, EventArgs e) // wybor koloru lub tekstury
         {
-            ColorDialog colorDialog = new ColorDialog();
-            if (colorDialog.ShowDialog() == DialogResult.OK)
+            if (textureRadio.Checked == true) // wybor pliku z tekstura 
             {
-                objectColor = colorDialog.Color;
-                RefreshObjectPicture();
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.Filter = "Image files (*.png, *.jpg)|*.png;*.jpg";
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    texture = Image.FromFile(openFileDialog.FileName);
+                }
                 Redraw();
+            }
+            else // wybor koloru
+            {
+                ColorDialog colorDialog = new ColorDialog();
+                if (colorDialog.ShowDialog() == DialogResult.OK)
+                {
+                    objectColor = colorDialog.Color;
+                    RefreshObjectPicture();
+                    Redraw();
+                }
             }
         }
 
@@ -319,18 +344,30 @@ namespace Triangles
             timer.Enabled = false;
         }
 
-        private void textureRadio_CheckedChanged(object sender, EventArgs e)
+        private void textureRadio_CheckedChanged(object sender, EventArgs e) // przelaczanie miedzy stalym kolorem a tekstura
         {
+            if (textureRadio.Checked)
+            {
+                objectColorButton.Text = "Texture";
+                objectPicture.Image = new Bitmap(texture, objectPicture.Width, objectPicture.Height);
+                objectPicture.Refresh();
+            }
+            else
+            {
+                objectColorButton.Text = "Object color";
+                RefreshObjectPicture();
+            }
             Redraw();
         }
 
-        private void textureButton_Click(object sender, EventArgs e)
+        private void normalButton_Click(object sender, EventArgs e) // wczytanie mapy wektorow normalnych i wlaczneie opcji modyfikacji wektorow
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Image files (*.png, *.jpg)|*.png;*.jpg";
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                texture = Image.FromFile(openFileDialog.FileName);
+                modifyCheck.Enabled = true;
+                normalMap = Image.FromFile(openFileDialog.FileName);
             }
             Redraw();
         }

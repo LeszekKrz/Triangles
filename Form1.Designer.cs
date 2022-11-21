@@ -399,6 +399,7 @@
             // 
             this.modifyCheck.AutoSize = true;
             this.modifyCheck.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.modifyCheck.Enabled = false;
             this.modifyCheck.Location = new System.Drawing.Point(3, 50);
             this.modifyCheck.Name = "modifyCheck";
             this.modifyCheck.Size = new System.Drawing.Size(182, 20);
@@ -440,9 +441,9 @@
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(85, 35);
             this.button2.TabIndex = 1;
-            this.button2.Text = "Texture";
+            this.button2.Text = "Normal map";
             this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.textureButton_Click);
+            this.button2.Click += new System.EventHandler(this.normalButton_Click);
             // 
             // Form1
             // 
